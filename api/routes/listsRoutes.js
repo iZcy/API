@@ -6,7 +6,6 @@ router
   .get("/", listsController.listsGet)
   .post("/", listsController.listsPost)
   .patch("/", listsController.listsPatch)
-  .delete("/", listsController.listsDelete)
-  .delete("/lists", listsController.deleteRelatedCards, listsController.listsDelete);
+  .delete("/", listsController.listsDelete);
 
 module.exports = router;

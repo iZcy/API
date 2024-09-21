@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const Lists = require("../models/listsModels");
-const Cards = require("../models/cardModels")
-const Boards = require("../models/boardModels")
+const Cards = require("../models/cardModels");
+const Boards = require("../models/boardModels");
 
+// GET all lists
 const listsGet = async (req, res) => {
   try {
     const data = await Lists.find().populate("boardId");
@@ -13,6 +14,7 @@ const listsGet = async (req, res) => {
   }
 };
 
+// POST a new list
 const listsPost = async (req, res) => {
   try {
     const { title, boardId, position, createdBy } = req.body;
@@ -53,6 +55,7 @@ const listsPost = async (req, res) => {
   }
 };
 
+// PATCH an existing list
 const listsPatch = async (req, res) => {
   try {
     const { id, title, boardId, position, createdBy } = req.body;
@@ -95,37 +98,26 @@ const listsPatch = async (req, res) => {
   }
 };
 
-// Middleware to delete related cards when a list is deleted
-const deleteRelatedCards = async (req, res, next) => {
-  const { id } = req.body;
-
-  if (!id) return res.status(400).json({ data: "ID is required" });
-
-  // Check if the list exists
-  const list = await Lists.findById(id);
-  if (!list) {
-    return res.status(404).json({ data: "List not found" });
-  }
-
-  // Delete all related cards
-  await Cards.deleteMany({ listId: id }); // Ensure Cards model has a field listId
-
-  // Proceed to the next middleware or the deletion logic
-  next();
-};
-
+// DELETE a list and related cards
 const listsDelete = async (req, res) => {
   try {
     const { id } = req.body;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
-    const data = await Lists.findByIdAndDelete(id);
-    if (!data) {
+    // Check if the list exists
+    const list = await Lists.findById(id);
+    if (!list) {
       return res.status(404).json({ data: "List not found" });
     }
 
-    res.status(200).json({ data: "List deleted" });
+    // Delete all related cards
+    await Cards.deleteMany({ listID: id }); // Ensure Cards model has a field listID
+
+    // Now delete the list
+    await Lists.findByIdAndDelete(id);
+
+    res.status(200).json({ data: "List and related cards deleted" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ data: "Error deleting List" });
@@ -137,5 +129,4 @@ module.exports = {
   listsPost,
   listsPatch,
   listsDelete,
-  deleteRelatedCards // Export the middleware
 };
