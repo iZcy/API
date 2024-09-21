@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const roleEnum = require("../helper/enumerations");
+const enums = require("../helper/enumerations");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -15,15 +15,9 @@ const userSchema = new mongoose.Schema({
     required: true
   },
   role: {
-    type: [String],
+    type: String,
     required: true,
-    validate: {
-      validator: function (roles) {
-        // Ensure each role in the array is valid
-        return roles.every((role) => roleEnum.includes(role));
-      },
-      message: (props) => `${props.value} contains an invalid role`
-    }
+    enum: enums.roleEnum
   },
   createdAt: {
     type: Date,
