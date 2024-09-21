@@ -146,7 +146,7 @@ const userLogin = async (req, res) => {
 
     res
       .status(200)
-      .cookie("token", token, cookiesOptionsGen())
+      .cookie("KanbanAPIToken", token, cookiesOptionsGen())
       .json({ data: "Logged in" });
   } catch (error) {
     console.log(error);
