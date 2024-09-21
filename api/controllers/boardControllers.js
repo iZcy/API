@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
-const Board = require('../models/boardModels');
+const Board = require("../models/boardModels");
+const User = require("../models/userModels");
 const Lists = require('../models/listsModels');
+const enums = require("../helper/enumerations");
 
 const deleteListsMiddleware = async (req, res, next) => {
     try {
@@ -31,15 +33,26 @@ const boardGet = async (req, res) => {
 
 const boardPost = async (req, res) => {
     try {
-        const { boardId, title, description, createdBy, visibility } = req.body;
+        const { title, userId, description, createdBy, visibility } = req.body
 
-        if (!boardId || !title || !createdBy || !visibility) {
-            return res.status(400).json({ message: "All required fields must be provided." });
-        }
+        //check existence of required fields
+        if (!title) return res.status(400).json({ message: "Title is required" });
+        if (!userId) return res.status(400).json({ message: "User ID is required" });
+        if (!createdBy) return res.status(400).json({ message: "CreatedBy is required" });
+        
+        if (!enums.visibilityEnum.includes(visibility)) return res.status(400).json({ message: "Invalid visibility value." });
+
+        //check data types
+        if (typeof title !== "string") return res.status(400).json({ message: "Invalid title: Wrong Type" });
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ message: "Invalid userId: Must be a valid ObjectId" });
+        if (typeof createdBy !== "string") return res.status(400).json({ message: "Invalid createdBy: Wrong Type" });
+
+        const userExists = await User.findById(userId);
+        if (!userExists) return res.status(400).json({ message: "User ID not found" });
 
         const newBoard = new Board({
-            boardId,
             title,
+            userId,
             description,
             createdBy,
             visibility
@@ -54,12 +67,27 @@ const boardPost = async (req, res) => {
 
 const boardPatch = async (req, res) => {
     try {
-        const { id, title, description, createdBy, visibility } = req.body;
+        const {id, title, userId, description, createdBy, visibility } = req.body;
         const data = await Board.findById(id);
+
+        //check avaliability
+        if (!id) return res.status(400).json({ data: "ID is required" });
 
         if (!data) {
             return res.status(404).send("Board not found");
         }
+        
+        if (userId){
+            if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ data: "Invalid userId: Must be a valid ObjectId" });
+            
+            const userExists = await User.findById(userId);
+            if (!userExists) return res.status(400).json({ data: "User ID not found" });
+        }
+
+        //check data types
+        if (title && typeof title !== "string") return res.status(400).json({ data: "Invalid title: Wrong Type" });
+        if (description && typeof description !== "string") return res.status(400).json({ data: "Invalid description: Wrong Type" });
+        if (createdBy && typeof createdBy !== "string") return res.status(400).json({ data: "Invalid createdBy: Wrong Type" });
 
         data.title = title;
         data.description = description;
@@ -76,6 +104,9 @@ const boardPatch = async (req, res) => {
 const boardDelete = [deleteListsMiddleware, async (req, res) => {
     try {
         const { id } = req.body;
+
+        if (!id) return res.status(400).json({ data: "ID is required" });
+
         await Board.findByIdAndDelete(id);
         res.status(200).send("Board deleted");
     } catch (error) {
