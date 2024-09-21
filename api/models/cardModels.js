@@ -25,16 +25,16 @@ const cardSchema = new mongoose.Schema({
   }],
   status: {
     type: String,
-    enum: ['to-do', 'in-progress', 'done'],  // Status bisa 'to-do', 'in-progress', atau 'done'
-    default: 'to-do'  // Default status adalah 'to-do'
+    enum: ['to-do', 'in-progress', 'done'],  
+    default: 'to-do'  
   },
   createdAt: {
     type: Date,
-    default: Date.now  // Waktu pembuatan otomatis diisi dengan waktu saat ini
+    default: Date.now  
   },
   dueDate: {
     type: Date,
-    required: false  // DueDate opsional
+    required: false  
   }
 });
 
