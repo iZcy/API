@@ -1,6 +1,6 @@
-const roleEnum = ["admin", "member", "guest"];
-visibilityEnum = ["public", "private"];
-statusEnum = ["to-do", "in-progress", "done"];
+const roleEnum = ["guest", "member", "admin"];
+const visibilityEnum = ["public", "private"];
+const statusEnum = ["to-do", "in-progress", "done"];
 
 module.exports = {
   roleEnum,

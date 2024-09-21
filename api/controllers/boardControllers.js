@@ -1,19 +1,19 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const User = require("../models/userModels");
-const Board = require('../models/boardModels');
-const Lists = require('../models/listsModels');
+const Board = require("../models/boardModels");
+const Lists = require("../models/listsModels");
 const enums = require("../helper/enumerations");
 
 const deleteListsMiddleware = async (req, res, next) => {
-    try {
-        const { id } = req.body;
+  try {
+    const { id } = req.body;
 
-        const board = await Board.findById(id);
-        if (!board) {
-            return res.status(404).json({ message: "Board not found" });
-        }
+    const board = await Board.findById(id);
+    if (!board) {
+      return res.status(404).json({ message: "Board not found" });
+    }
 
-        await Lists.deleteMany({ boardId: id });
+    await Lists.deleteMany({ boardId: id });
 
         next();
     } catch (error) {
@@ -33,8 +33,8 @@ const boardGet = async (req, res) => {
 };
 
 const boardPost = async (req, res) => {
-    try {
-        const { title, userId, description, visibility } = req.body;
+  try {
+    const { title, userId, description, visibility } = req.body;
 
         if (!title) return res.status(400).json({ message: "Title is required" });
         if (!userId) return res.status(400).json({ message: "User ID is required" });
