@@ -22,9 +22,14 @@ app.use("/task", require("./routes/taskRoutes"));
 app.use("/info", require("./routes/infoRoutes"));
 app.use("/board", require("./routes/boardRoutes"));
 app.use("/auth", require("./routes/authRoutes"));
+<<<<<<< HEAD
 app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
 app.use("/cards", require("./routes/cardRoutes"))
+=======
+//app.use("/lists", require("./routes/listsRoutes"));
+app.use("/comments", require("./routes/commentsRoutes"));
+>>>>>>> e17a1a1 (all endpoints from board model already been testing)
 
 // Start the server
 app.listen(PORT, () => {
