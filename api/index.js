@@ -23,6 +23,7 @@ app.use("/info", require("./routes/infoRoutes"));
 
 // Start the server
 app.listen(PORT, () => {
+  console.log(`Welcom to KanbanAPI`);
   console.log(`Server is running on port ${PORT}`);
   console.log(`Mode: ${process.env.NODE_ENV}`);
 });
