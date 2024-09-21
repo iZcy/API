@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require("../models/userModels");
+const Board = require('../models/boardModels');
 const Lists = require('../models/listsModels');
 const enums = require("../helper/enumerations");
 
@@ -85,6 +86,7 @@ const boardPatch = async (req, res) => {
         //check data types
         if (title && typeof title !== "string") return res.status(400).json({ data: "Invalid title: Wrong Type" });
         if (description && typeof description !== "string") return res.status(400).json({ data: "Invalid description: Wrong Type" });
+        if (visibility && !enums.visibilityEnum.includes(visibility)) return res.status(400).json({ message: "Invalid visibility value." });
 
         data.title = title;
         data.userId = data.userId;
