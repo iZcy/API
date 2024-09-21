@@ -1,7 +1,8 @@
 const Card = require('../models/cardModels');
+const mongoose = require('mongoose');
 
 // Create a new card
-exports.cardsPost = async (req, res) => {
+const cardsPost = async (req, res) => {
   try {
     const { title, description, listId, assignedTo, status, createdAt, dueDate } = req.body;
     
@@ -37,7 +38,7 @@ exports.cardsPost = async (req, res) => {
 
 
 // Get all cards
-exports.cardsGet = async (req, res) => {
+const cardsGet = async (req, res) => {
   try {
     const cards = await Card.find().populate('assignedTo');  // Populate users
     res.status(200).json(cards);
@@ -47,7 +48,7 @@ exports.cardsGet = async (req, res) => {
 };
 
 // Update a card
-exports.cardsPatch = async (req, res) => {
+const cardsPatch = async (req, res) => {
   try {
     const { title, status } = req.body;
 
@@ -74,7 +75,7 @@ exports.cardsPatch = async (req, res) => {
 
 
 // Delete a card
-exports.cardsDelete = async (req, res) => {
+const cardsDelete = async (req, res) => {
   try {
     const cardId = req.params.id;
 
@@ -90,4 +91,11 @@ exports.cardsDelete = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+module.exports = {
+  cardsPost,
+  cardsGet,
+  cardsPatch,
+  cardsDelete
 };
