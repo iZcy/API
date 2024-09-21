@@ -3,11 +3,19 @@ const Card = require('../models/cardModels');
 // Create a new card
 exports.createCard = async (req, res) => {
   try {
-    const newCard = new Card(req.body);
-    const savedCard = await newCard.save();
+    const { title, description, listId, assignedTo, status, createdAt,  dueDate } = req.body;
+    const savedCard = await newCard.save({
+      title,
+      description,
+      listId, 
+      assignedTo,
+      status,
+      createdAt,
+      dueDate
+    });
     res.status(201).json(savedCard);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).send("Error creating card");
   }
 };
 
@@ -24,13 +32,21 @@ exports.getAllCards = async (req, res) => {
 // Update a card
 exports.updateCard = async (req, res) => {
   try {
-    const updatedCard = await Card.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { title, status } = req.body;
+    const updatedCard = await Card.findByIdAndUpdate(
+      req.params.id,
+      { title, status }, 
+      { new: true } 
+    );
+
     if (!updatedCard) return res.status(404).json({ message: 'Card not found' });
+
     res.status(200).json(updatedCard);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 // Delete a card
 exports.deleteCard = async (req, res) => {
