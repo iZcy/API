@@ -4,6 +4,9 @@ const Card = require('../models/cardModels');
 exports.createCard = async (req, res) => {
   try {
     const { title, description, listId, assignedTo, status, createdAt, dueDate } = req.body;
+    if (!title || !description || !listId || !assignedTo || !status || !createdAt || !dueDate) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
     const newCard = new Card({
       title,
       description,
@@ -36,6 +39,10 @@ exports.getAllCards = async (req, res) => {
 exports.updateCard = async (req, res) => {
   try {
     const { title, status } = req.body;
+    if (!title || !status) {
+      return res.status(400).json({ message: "Both title and status are required." });
+    }
+
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
       { title, status }, 
@@ -46,7 +53,7 @@ exports.updateCard = async (req, res) => {
 
     res.status(200).json(updatedCard);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).send("Error updating card: " + error.message);
   }
 };
 
@@ -58,6 +65,6 @@ exports.deleteCard = async (req, res) => {
     if (!deletedCard) return res.status(404).json({ message: 'Card not found' });
     res.status(200).json({ message: 'Card deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).send("Error deleting: " + error.message);
   }
 };
