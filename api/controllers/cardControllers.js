@@ -1,4 +1,4 @@
-const Card = require('../models/Card');
+const Card = require('../models/cardModels');
 
 // Create a new card
 exports.createCard = async (req, res) => {
