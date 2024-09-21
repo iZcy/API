@@ -1,16 +1,14 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const listsSchema = new mongoose.Schema({
-  listId: {
-    type: String,
-    required: true
-  },
   title: {
     type: String,
     required: true
   },
   boardId: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "Board",
     required: true
   },
   position: {
