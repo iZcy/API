@@ -1,5 +1,6 @@
 // models/taskModels.js
 const mongoose = require('mongoose');
+const enums = require('../helper/enumerations');
 
 const cardSchema = new mongoose.Schema({
   title: {

@@ -1,7 +1,7 @@
 const Card = require('../models/cardModels');
 
 // Create a new card
-exports.createCard = async (req, res) => {
+exports.cardsPost = async (req, res) => {
   try {
     const { title, description, listId, assignedTo, status, createdAt, dueDate } = req.body;
     const newCard = new Card({
@@ -23,7 +23,7 @@ exports.createCard = async (req, res) => {
 
 
 // Get all cards
-exports.getAllCards = async (req, res) => {
+exports.cardsGet = async (req, res) => {
   try {
     const cards = await Card.find().populate('assignedTo');  // Populate users
     res.status(200).json(cards);
@@ -33,7 +33,7 @@ exports.getAllCards = async (req, res) => {
 };
 
 // Update a card
-exports.updateCard = async (req, res) => {
+exports.cardsPatch = async (req, res) => {
   try {
     const { title, status } = req.body;
     const updatedCard = await Card.findByIdAndUpdate(
@@ -52,7 +52,7 @@ exports.updateCard = async (req, res) => {
 
 
 // Delete a card
-exports.deleteCard = async (req, res) => {
+exports.cardsDelete = async (req, res) => {
   try {
     const deletedCard = await Card.findByIdAndDelete(req.params.id);
     if (!deletedCard) return res.status(404).json({ message: 'Card not found' });
