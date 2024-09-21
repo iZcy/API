@@ -12,7 +12,7 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   listId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'List',  // Referensi ke Collection Lists
     required: true  // Setiap Card harus terkait dengan List
   },
