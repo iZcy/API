@@ -1,4 +1,5 @@
 const Card = require("../models/cardModels");
+const List = require("../models/listsModels")
 
 // Create a new card
 const cardsPost = async (req, res) => {
@@ -15,13 +16,15 @@ const cardsPost = async (req, res) => {
       if (!dueDate) return res.status(400).json({ data: "Due Date is required." });
     
       // Check the data types
-      if (!mongoose.Types.ObjectId.isValid(listId)) return res.status(400).json({ error: "List ID type must be ObjectId" });
+      const list = await List.findById(listId);
+      if (!list) return res.status(400).json({data: "ID is not a valid List ID."})
+
       if (!Array.isArray(assignedTo)) return res.status(400).json({ error: "Assigned To must be an array" });
 
     const newCard = new Card({
       title,
       description,
-      listId,
+      listID: listId,
       assignedTo,
       status,
       createdAt,
@@ -31,6 +34,7 @@ const cardsPost = async (req, res) => {
     const savedCard = await newCard.save();
     res.status(201).json(savedCard);
   } catch (error) {
+    console.log(error)
     res.status(400).json({ data: "Error creating card" });
   }
 };
@@ -51,21 +55,12 @@ const cardsPatch = async (req, res) => {
     const { title, status } = req.body;
 
     // Check body existence
-    if (!cardId) return res.status(400).json({ error: "Card ID is required." });
     if (!title && !status) return res.status(400).json({ error: "At least one field (title or status) is required to update." });
 
     // Check if the card ID is valid
-    if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ error: "Card ID type must be ObjectId" });
-    if (!cardId)
-      return res.status(400).json({ message: "Card ID is required." });
-    if (!title && !status)
-      return res.status(400).json({
+    if (!title && !status) return res.status(400).json({
         message: "At least one field (title or status) is required to update."
       });
-
-    // Check if the card ID is valid
-    if (!mongoose.Types.ObjectId.isValid(cardId))
-      return res.status(400).json({ message: "Card ID type must be ObjectId" });
 
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
@@ -74,8 +69,6 @@ const cardsPatch = async (req, res) => {
     );
 
     if (!updatedCard) return res.status(404).json({ data: 'Card not found' });
-    if (!updatedCard)
-      return res.status(404).json({ message: "Card not found" });
 
     res.status(200).json(updatedCard);
   } catch (error) {
@@ -92,11 +85,8 @@ const cardsDelete = async (req, res) => {
     if (!cardId) return res.status(400).json({ error: "Card ID is required." });
 
     // Check if the card ID is valid
-    if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ error: "Card ID type must be ObjectId" });
-
-    // Check if the card ID is valid
-    if (!mongoose.Types.ObjectId.isValid(cardId))
-      return res.status(400).json({ message: "Card ID type must be ObjectId" });
+    const card = await Card.findById(cardId);
+      if (!card) return res.status(400).json({data: "ID is not a valid Card ID."})
 
     const deletedCard = await Card.findByIdAndDelete(req.params.id);
     if (!deletedCard)
