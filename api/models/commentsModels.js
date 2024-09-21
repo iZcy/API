@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 
 const commentsSchema = new mongoose.Schema({
   "cardId": {
-    type: String,
-    // ref: "Cards", // Reference to Cards collection
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Cards", // Reference to Cards collection
     required: true
   },
   "userId": {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     // ref: "Users", // Reference to Users collection
     required: true
   },
