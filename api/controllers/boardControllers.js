@@ -32,7 +32,41 @@ const boardPost = async (req, res) => {
     }
 };
 
+const boardPatch = async (req, res) => {
+    try {
+        const {id, boardId, title, description, createdBy, visibility } = req.body;
+        const data = await Board.findById(id);
+
+        if (!data) {
+        return res.status(404).send("Board not found");
+        }
+
+        data.title = title;
+        data.description = description;
+        data.createdBy = createdBy;
+        data.visibility = visibility;
+        await data.save();
+
+        res.status(200).send(data + " updated");
+    } catch (error) {
+        res.status(500).send("Error updating board");
+    }
+};
+
+const boardDelete = async (req, res) => {
+    try {
+        const { id } = req.body;
+        await Board.findByIdAndDelete(id);
+
+        res.status(200).send("Board deleted");
+    } catch (error) {
+        res.status(500).send("Error deleting board");
+    }
+};
+
 module.exports = {
     boardPost,
-    boardGet
+    boardGet,
+    boardPatch,
+    boardDelete
 };

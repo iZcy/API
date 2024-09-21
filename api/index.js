@@ -25,6 +25,8 @@ app.use("/auth", require("./routes/authRoutes"));
 app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
 app.use("/cards", require("./routes/cardRoutes"))
+//app.use("/lists", require("./routes/listsRoutes"));
+app.use("/comments", require("./routes/commentsRoutes"));
 
 // Start the server
 app.listen(PORT, () => {
