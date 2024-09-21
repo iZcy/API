@@ -7,5 +7,6 @@ router.post("/login", authController.userLogin);
 router.get("/logout", authController.userLogout);
 router.get("/role", authController.userRole);
 router.patch("/change-password", authController.userChangePassword);
+router.delete("/delete", authController.userDelete);
 
 module.exports = router;
