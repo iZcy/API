@@ -15,14 +15,15 @@ const commentsGet = async (req, res) => {
 
 const commentsPost = async (req, res) => {
   try {
-    const { cardId, userId, content, isEdited } = req.body;
+    // const { cardId, userId, content, isEdited } = req.body;
+    const { cardId, userId, content } = req.body;
 
     const newComments = new Comments({
       cardId,
       userId,
       content,
       // isEdited: false // Set isEdited to false when first created
-      isEdited// Set isEdited to false when first created
+      // isEdited
     });
     await newComments.save();
     // res.status(200).send(newComments + " saved");
@@ -37,7 +38,8 @@ const commentsPost = async (req, res) => {
 const commentsPatch = async (req, res) => {
   try {
     // const { id, content } = req.body;
-    const { id, cardId, userId, content, isEdited } = req.body;
+    // const { id, cardId, userId, content, isEdited } = req.body;
+    const { id, cardId, userId, content } = req.body;
     const data = await Comments.findById(id);
 
     if (!data) {
@@ -63,7 +65,7 @@ const commentsPatch = async (req, res) => {
 const commentsDelete = async (req, res) => {
   try {
     const { id } = req.body;
-    await Comments.findByIdAndDelete(id);
+    const result = await Comments.findByIdAndDelete(id);
 
     if (!result) {
       return res.status(404).json({ error: "Comment not found" });
