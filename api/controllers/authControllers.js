@@ -154,7 +154,18 @@ const userLogin = async (req, res) => {
   }
 };
 
+const userLogout = async (req, res) => {
+  try {
+    res.clearCookie("KanbanAPIToken", cookiesOptionsGen());
+    res.status(200).json({ data: "Logged out" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ data: "Error logging out" });
+  }
+};
+
 module.exports = {
   userRegister,
-  userLogin
+  userLogin,
+  userLogout
 };
