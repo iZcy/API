@@ -69,14 +69,14 @@ const boardPost = async (req, res) => {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: `Validation Error: ${error.message}` });
         }
-        
+
         res.status(500).send("Error saving board");
     }
 };
 
 const boardPatch = async (req, res) => {
     try {
-        const {id, title, userId, description, createdBy, visibility } = req.body;
+        const {id, title, description, visibility } = req.body;
         const data = await Board.findById(id);
 
         //check avaliability
@@ -86,21 +86,15 @@ const boardPatch = async (req, res) => {
             return res.status(404).send("Board not found");
         }
         
-        if (userId){
-            if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ data: "Invalid userId: Must be a valid ObjectId" });
-            
-            const userExists = await User.findById(userId);
-            if (!userExists) return res.status(400).json({ data: "User ID not found" });
-        }
 
         //check data types
         if (title && typeof title !== "string") return res.status(400).json({ data: "Invalid title: Wrong Type" });
         if (description && typeof description !== "string") return res.status(400).json({ data: "Invalid description: Wrong Type" });
-        if (createdBy && typeof createdBy !== "string") return res.status(400).json({ data: "Invalid createdBy: Wrong Type" });
 
         data.title = title;
+        data.userId = data.userId;
         data.description = description;
-        data.createdBy = createdBy;
+        data.createdBy = data.createdBy;
         data.visibility = visibility;
         await data.save();
 
