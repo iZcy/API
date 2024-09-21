@@ -7,7 +7,7 @@ const cookieName = process.env.COOKIE_NAME;
 
 const parseTokenData = async (req, res) => {
   const token = req.cookies[cookieName];
-
+  
   if (!token) {
     req.user = { role: enums.roleEnum[0] }; // Assign default role
     return null;
@@ -29,6 +29,9 @@ const parseTokenData = async (req, res) => {
     req.user = userData;
     return null;
   } catch (err) {
+    console.error("Error parsing token data:", err);
+    // clear the cookie
+    res.clearCookie(cookieName);
     return res.status(401).json({ message: "Token not valid" });
   }
 };

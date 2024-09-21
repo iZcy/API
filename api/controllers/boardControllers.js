@@ -25,13 +25,14 @@ const deleteListsMiddleware = async (req, res, next) => {
 };
 
 const boardGet = async (req, res) => {
-  try {
-    const data = await Board.find().populate("userId", "username");
-    res.status(200).json(data);
-  } catch (error) {
-    console.error("Error retrieving boards:", error);
-    res.status(500).json({ message: "Error retrieving boards" });
-  }
+    try {
+      const userId = req.user._id;
+      const data = await Board.find({ userId }).populate("userId", "username");
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Error retrieving boards:", error);
+      res.status(500).json({ message: "Error retrieving boards" });
+    }
 };
 
 const boardPost = async (req, res) => {
@@ -69,7 +70,7 @@ const boardPost = async (req, res) => {
       title,
       userId,
       description,
-      createdBy: userExists.username,
+      //createdBy: userExists.username,
       visibility,
     });
 
@@ -87,65 +88,60 @@ const boardPost = async (req, res) => {
 };
 
 const boardPatch = async (req, res) => {
-  try {
-    const { title, description, visibility } = req.body;
-    const { id } = req.params;
-
-    // Validation checks
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res
-        .status(400)
-        .json({ message: "Invalid boardId: Must be a valid ObjectId" });
-
-    const board = await Board.findById(id);
-    if (!board) {
-      return res.status(404).json({ message: "Board not found" });
+    try {
+      const { title, description, visibility } = req.body;
+      const { id } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(id))
+        return res.status(400).json({ message: "Invalid boardId: Must be a valid ObjectId" });
+  
+      const board = await Board.findById(id);
+      if (!board) {
+        return res.status(404).json({ message: "Board not found" });
+      }
+  
+      if (!board.userId.equals(req.user._id)) {
+        return res.status(403).json({ message: "Forbidden: You do not own this board" });
+      }
+  
+      board.title = title || board.title;
+      board.description = description || board.description;
+      board.visibility = visibility || board.visibility;
+  
+      await board.save();
+      res.status(200).json({ message: "Board updated", board });
+    } catch (error) {
+      console.error("Error updating board:", error);
+      res.status(500).json({ message: "Error updating board" });
     }
+  };  
 
-    // Check data types
-    if (title && typeof title !== "string")
-      return res.status(400).json({ message: "Invalid title: Wrong Type" });
-    if (description && typeof description !== "string")
-      return res
-        .status(400)
-        .json({ message: "Invalid description: Wrong Type" });
-    if (visibility && !enums.visibilityEnum.includes(visibility))
-      return res.status(400).json({ message: "Invalid visibility value" });
-
-    // Update board fields
-    board.title = title || board.title;
-    board.description = description || board.description;
-    board.visibility = visibility || board.visibility;
-
-    await board.save();
-
-    res.status(200).json({ message: "Board updated", board });
-  } catch (error) {
-    console.error("Error updating board:", error);
-    res.status(500).json({ message: "Error updating board" });
-  }
-};
-
-const boardDelete = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Validate Board ID
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid Board ID" });
+  const boardDelete = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid Board ID" });
+      }
+  
+      const board = await Board.findById(id);
+      if (!board) {
+        return res.status(404).json({ message: "Board not found" });
+      }
+  
+      // Check authorization
+      if (!board.userId.equals(req.user._id)) {
+        return res.status(403).json({ message: "Forbidden: You do not own this board" });
+      }
+  
+      await Board.findByIdAndDelete(id); // Delete the board
+      res.status(200).json({ message: "Board deleted", board });
+    } catch (error) {
+      console.error("Error deleting board:", error);
+      res.status(500).json({ message: "Error deleting board" });
     }
-
-    const board = await Board.findByIdAndDelete(id);
-    if (!board) {
-      return res.status(404).json({ message: "Board not found" });
-    }
-
-    res.status(200).json({ message: "Board deleted", board });
-  } catch (error) {
-    console.error("Error deleting board:", error);
-    res.status(500).json({ message: "Error deleting board" });
-  }
-};
+  };
+  
 
 module.exports = {
   boardPost,
