@@ -30,7 +30,7 @@ switch (process.env.NODE_ENV) {
 // MongoDB connection
 const dbURI = process.env.DB_URI; // Replace with your MongoDB URI
 mongoose
-  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(dbURI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("Error connecting to MongoDB:", err));
 
@@ -49,7 +49,7 @@ app.use("/auth", require("./routes/authRoutes"));
 <<<<<<< HEAD
 app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
-app.use("/cards", require("./routes/cardRoutes"))
+app.use("/cards", require("./routes/cardRoutes"));
 app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
 >>>>>>> e17a1a1 (all endpoints from board model already been testing)
