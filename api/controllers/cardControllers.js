@@ -3,21 +3,24 @@ const Card = require('../models/cardModels');
 // Create a new card
 exports.createCard = async (req, res) => {
   try {
-    const { title, description, listId, assignedTo, status, createdAt,  dueDate } = req.body;
-    const savedCard = await newCard.save({
+    const { title, description, listId, assignedTo, status, createdAt, dueDate } = req.body;
+    const newCard = new Card({
       title,
       description,
-      listId, 
+      listId,
       assignedTo,
       status,
       createdAt,
       dueDate
     });
+
+    const savedCard = await newCard.save();
     res.status(201).json(savedCard);
   } catch (error) {
-    res.status(400).send("Error creating card");
+    res.status(400).send("Error creating card: " + error.message);
   }
 };
+
 
 // Get all cards
 exports.getAllCards = async (req, res) => {
