@@ -44,7 +44,7 @@ const commentsPost = async (req, res) => {
       return res.status(400).json({ data: "cardId doesn't exist!"});
     }
     // Check if userId exists
-    const user_check = await User.findOne({ _id: userdId });
+    const user_check = await User.findOne({ _id: userId });
     if (!user_check) {
       return res.status(400).json({ data: "userId doesn't exist!"});
     }
