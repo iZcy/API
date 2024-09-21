@@ -11,17 +11,17 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   listID: {
-    type: String,
-    // ref: 'List',  // Referensi ke Collection Lists
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'List',  // Referensi ke Collection Lists
     required: true  // Setiap Card harus terkait dengan List
   },
   assignedTo: [{
     type: String,
-    // ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
+    ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
   }],
   status: {
     type: String,
-    enum: ['to-do', 'in-progress', 'done'],  
+    enum: enums.statusEnum,  
     default: 'to-do'  
   },
   createdAt: {
