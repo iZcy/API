@@ -1,6 +1,7 @@
 const Comments = require("../models/commentsModels");
 const User = require("../models/userModels");
 const Card = require("../models/cardModels");
+const { default: mongoose } = require("mongoose");
 
 const commentsGet = async (req, res) => {
   try {
@@ -38,13 +39,18 @@ const commentsPost = async (req, res) => {
       return res.status(400).json({ data: "content is required!"});
     }
 
+    // Check the data types
+    if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ data: "cardId type must be ObjectId"});
+    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ data: "userId type must be ObjectId"});
+    if (typeof content !== "string") return res.status(400).json({ data: "content type must be string"});
+
     // Check if cardId exists
     const card_check = await Card.findOne({ _id: cardId });
     if (!card_check) {
       return res.status(400).json({ data: "cardId doesn't exist!"});
     }
     // Check if userId exists
-    const user_check = await User.findOne({ _id: userdId });
+    const user_check = await User.findOne({ _id: userId });
     if (!user_check) {
       return res.status(400).json({ data: "userId doesn't exist!"});
     }
@@ -87,6 +93,12 @@ const commentsPatch = async (req, res) => {
     if (!content) {
       res.status(400).json({ data: "content is required!" });
     }
+
+    // Check the data types
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ data: "id type must be ObjectId"});
+    if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ data: "cardId type must be ObjectId"});
+    if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ data: "userId type must be ObjectId"});
+    if (typeof content !== "string") return res.status(400).json({ data: "content type must be string"});
 
     // Check if id exists
     const id_check = await Comments.findOne({ id });
@@ -135,6 +147,8 @@ const commentsDelete = async (req, res) => {
     if (!id) {
       return res.status(404).json({ data: "id is required!" });
     }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ data: "id type must be ObjectId"});
 
     // Check if id exists
     const id_check = await Comments.findOne({ id });

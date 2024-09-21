@@ -1,37 +1,10 @@
-const mongoose = require("mongoose");
-const Lists = require("../models/listsModels");
-const Cards = require("../models/cardModels");
-const Comment = require('../models/commentsModels');
+const Card = require('../models/cardModels');
 
-// GET all cards
-const cardsGet = async (req, res) => {
-  try {
-    const data = await Cards.find().populate("assignedTo"); // Populate assigned users
-    res.status(200).send(data);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("Error getting Cards");
-  }
-};
-
-// POST a new card
-const cardsPost = async (req, res) => {
+// Create a new card
+exports.createCard = async (req, res) => {
   try {
     const { title, description, listId, assignedTo, status, createdAt, dueDate } = req.body;
-
-    if (!title) return res.status(400).json({ data: "Title is required" });
-    if (!description) return res.status(400).json({ data: "Description is required" });
-    if (!listId) return res.status(400).json({ data: "List ID is required" });
-    
-    if (!mongoose.Types.ObjectId.isValid(listId))
-      return res.status(400).json({ data: "Invalid listId: Must be a valid ObjectId" });
-
-    const listExists = await Lists.findById(listId);
-    if (!listExists) {
-      return res.status(400).json({ data: "List ID not found" });
-    }
-
-    const newCard = new Cards({
+    const newCard = new Card({
       title,
       description,
       listId,
@@ -41,81 +14,50 @@ const cardsPost = async (req, res) => {
       dueDate
     });
 
-    await newCard.save();
-    res.status(201).json({ data: "Card created", card: newCard });
+    const savedCard = await newCard.save();
+    res.status(201).json(savedCard);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ data: "Error saving Card" });
+    res.status(400).send("Error creating card: " + error.message);
   }
 };
 
-// PATCH an existing card
-const cardsPatch = async (req, res) => {
+
+// Get all cards
+exports.getAllCards = async (req, res) => {
   try {
-    const { id, title, description, listId, assignedTo, status, dueDate } = req.body;
-
-    if (!id) return res.status(400).json({ data: "ID is required" });
-
-    const data = await Cards.findById(id);
-    if (!data) {
-      return res.status(404).json({ data: "Card not found" });
-    }
-
-    if (title && typeof title !== "string")
-      return res.status(400).json({ data: "Invalid title: Wrong Type" });
-
-    if (listId) {
-      if (!mongoose.Types.ObjectId.isValid(listId))
-        return res.status(400).json({ data: "Invalid listId: Must be a valid ObjectId" });
-
-      const listExists = await Lists.findById(listId);
-      if (!listExists) {
-        return res.status(400).json({ data: "List ID not found" });
-      }
-    }
-
-    data.title = title || data.title;
-    data.description = description || data.description;
-    data.listId = listId || data.listId;
-    data.assignedTo = assignedTo || data.assignedTo;
-    data.status = status || data.status;
-    data.dueDate = dueDate || data.dueDate;
-
-    await data.save();
-    res.status(200).json({ data: "Card updated" });
+    const cards = await Card.find().populate('assignedTo');  // Populate users
+    res.status(200).json(cards);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ data: "Error updating Card" });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// DELETE a card and related comments
-const cardsDelete = async (req, res) => {
+// Update a card
+exports.updateCard = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { title, status } = req.body;
+    const updatedCard = await Card.findByIdAndUpdate(
+      req.params.id,
+      { title, status }, 
+      { new: true } 
+    );
 
-    if (!id) return res.status(400).json({ data: "ID is required" });
+    if (!updatedCard) return res.status(404).json({ message: 'Card not found' });
 
-    const card = await Cards.findById(id);
-    if (!card) {
-      return res.status(404).json({ data: "Card not found" });
-    }
-
-    // Delete all related comments
-    await Comment.deleteMany({ cardId: id }); // Ensure the Comment model has a field cardId
-
-    // Delete the card itself
-    await Cards.findByIdAndDelete(id);
-    res.status(200).json({ data: "Card and related comments deleted" });
+    res.status(200).json(updatedCard);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ data: "Error deleting Card" });
+    res.status(400).json({ message: error.message });
   }
 };
 
-module.exports = {
-  cardsGet,
-  cardsPost,
-  cardsPatch,
-  cardsDelete,
+
+// Delete a card
+exports.deleteCard = async (req, res) => {
+  try {
+    const deletedCard = await Card.findByIdAndDelete(req.params.id);
+    if (!deletedCard) return res.status(404).json({ message: 'Card not found' });
+    res.status(200).json({ message: 'Card deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
