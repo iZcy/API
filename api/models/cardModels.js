@@ -16,12 +16,12 @@ const cardSchema = new mongoose.Schema({
   },
   listID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'List',  // Referensi ke Collection Lists
+    // ref: 'List',  // Referensi ke Collection Lists
     required: true  // Setiap Card harus terkait dengan List
   },
   assignedTo: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
+    // ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
   }],
   status: {
     type: String,
