@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const enums = require("../helper/enumerations");
 
+const cookieName = "kanbanapitoken";
+
 //domain check
 const cookiesOptionsGen = () => {
   const settings = {
@@ -135,6 +137,7 @@ const userLogin = async (req, res) => {
       return res.status(400).json({ data: "Invalid password" });
     }
 
+    // Generate token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -144,9 +147,10 @@ const userLogin = async (req, res) => {
       }
     );
 
+    // Send token
     res
       .status(200)
-      .cookie("KanbanAPIToken", token, cookiesOptionsGen())
+      .cookie(cookieName, token, cookiesOptionsGen())
       .json({ data: "Logged in" });
   } catch (error) {
     console.log(error);
@@ -156,7 +160,8 @@ const userLogin = async (req, res) => {
 
 const userLogout = async (req, res) => {
   try {
-    res.clearCookie("KanbanAPIToken", cookiesOptionsGen());
+    // Check if cookie exists
+    res.clearCookie(cookieName, cookiesOptionsGen());
     res.status(200).json({ data: "Logged out" });
   } catch (error) {
     console.log(error);
@@ -164,8 +169,41 @@ const userLogout = async (req, res) => {
   }
 };
 
+const userRole = async (req, res) => {
+  try {
+    // Check if cookie exists
+    if (!req.cookies) {
+      return res
+        .status(400)
+        .json({ data: "No token found: Cookies unavailable" });
+    }
+
+    // Check if token exists
+    const token = req.cookies[cookieName];
+    if (!token) {
+      return res
+        .status(400)
+        .json({ data: "No token found: Cookie name unavailable" });
+    }
+
+    // Check if token is valid
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      issuer: process.env.JWT_ISSUER
+    });
+
+    if (!decoded) return res.status(400).json({ data: "Invalid token" });
+
+    // Return role
+    res.status(200).json({ data: { role: decoded.role } });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ data: "Error getting role" });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
-  userLogout
+  userLogout,
+  userRole
 };

@@ -26,7 +26,7 @@ const boardPost = async (req, res) => {
         });
 
         await newBoard.save();
-        res.status(200).json({ data: "Board created" });
+        res.status(201).json({ data: "Board created", board: newBoard});
     } catch (error) {
         res.status(500).send("Error saving board");
     }
