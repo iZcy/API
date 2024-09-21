@@ -26,8 +26,7 @@ app.use("/auth", require("./routes/authRoutes"));
 app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
 app.use("/cards", require("./routes/cardRoutes"))
-=======
-//app.use("/lists", require("./routes/listsRoutes"));
+app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
 >>>>>>> e17a1a1 (all endpoints from board model already been testing)
 
