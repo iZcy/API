@@ -24,7 +24,7 @@ const deleteListsMiddleware = async (req, res, next) => {
 
 const boardGet = async (req, res) => {
     try {
-        const data = await Board.find();
+        const data = await Board.find().populate('createdBy', 'username'); // Populate the username field from User
         res.status(200).send(data);
     } catch (error) {
         res.status(500).send("Error getting boards");
@@ -33,34 +33,43 @@ const boardGet = async (req, res) => {
 
 const boardPost = async (req, res) => {
     try {
-        const { title, userId, description, createdBy, visibility } = req.body
+        const { title, userId, description, visibility } = req.body;
 
-        //check existence of required fields
+        // Check existence of required fields
         if (!title) return res.status(400).json({ message: "Title is required" });
         if (!userId) return res.status(400).json({ message: "User ID is required" });
-        if (!createdBy) return res.status(400).json({ message: "CreatedBy is required" });
-        
+
         if (!enums.visibilityEnum.includes(visibility)) return res.status(400).json({ message: "Invalid visibility value." });
 
-        //check data types
+        // Check data types
         if (typeof title !== "string") return res.status(400).json({ message: "Invalid title: Wrong Type" });
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).json({ message: "Invalid userId: Must be a valid ObjectId" });
-        if (typeof createdBy !== "string") return res.status(400).json({ message: "Invalid createdBy: Wrong Type" });
 
+        // Check if user exists and fetch username
         const userExists = await User.findById(userId);
         if (!userExists) return res.status(400).json({ message: "User ID not found" });
+
+        // Log the username to verify if it's being retrieved correctly
+        console.log(`Creating board with username: ${userExists.username}`);
 
         const newBoard = new Board({
             title,
             userId,
             description,
-            createdBy,
+            createdBy: userExists.username, 
             visibility
         });
 
         await newBoard.save();
         res.status(201).json({ data: "Board created", board: newBoard });
     } catch (error) {
+        console.error("Error saving board:", error.message);
+        
+        // Capture and return the specific error
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: `Validation Error: ${error.message}` });
+        }
+        
         res.status(500).send("Error saving board");
     }
 };

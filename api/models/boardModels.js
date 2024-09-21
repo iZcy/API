@@ -17,6 +17,7 @@ const boardSchema = new mongoose.Schema({
     },
     createdBy: {
         type: String,
+        // ref: "User", 
         required: true
     },
     visibility: {
