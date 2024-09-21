@@ -8,5 +8,6 @@ router.get("/logout", authController.userLogout);
 router.get("/role", authController.userRole);
 router.patch("/change-password", authController.userChangePassword);
 router.delete("/delete", authController.userDelete);
+router.patch("/update", authController.userUpdate);
 
 module.exports = router;

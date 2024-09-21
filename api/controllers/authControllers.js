@@ -314,11 +314,90 @@ const userDelete = async (req, res) => {
   }
 };
 
+const userUpdate = async (req, res) => {
+  try {
+    // Body parsing
+    const { email, password, username, role } = req.body;
+
+    // Check Body Existence
+    if (!email) return res.status(400).json({ data: "Email is required" });
+
+    // Check if there exist at least one field to update
+    if (!username && !role) {
+      return res.status(400).json({ data: "No field to update" });
+    }
+
+    // Check if there's an unknown field
+    if (
+      Object.keys(req.body).some(
+        (key) => !["email", "username", "role", "password"].includes(key)
+      )
+    ) {
+      return res.status(400).json({ data: "Unknown field to update" });
+    }
+
+    // Check Body Validity
+    const emailTooShort = email.length < 6;
+    const emailWrongType = typeof email !== "string";
+    if (emailWrongType) {
+      return res.status(400).json({ data: "Invalid email: Wrong Type" });
+    }
+    if (emailTooShort) {
+      return res.status(400).json({ data: "Invalid email: Too Short" });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ data: "User does not exist" });
+    }
+
+    // Validate password is true
+    if (!password)
+      return res.status(400).json({ data: "Password is required" });
+
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) {
+      return res.status(400).json({ data: "Invalid password" });
+    }
+
+    if (username) {
+      const usernameTooShort = username.length < 6;
+      const usernameWrongType = typeof username !== "string";
+      if (usernameWrongType) {
+        return res.status(400).json({ data: "Invalid username: Wrong Type" });
+      }
+      if (usernameTooShort) {
+        return res.status(400).json({ data: "Invalid username: Too Short" });
+      }
+      await User.updateOne({ email }, { username });
+    }
+
+    if (role) {
+      const roleWrongType = typeof role !== "string";
+      const roleNotInEnum = !enums.roleEnum.includes(role);
+      if (roleWrongType) {
+        return res.status(400).json({ data: "Invalid role: Wrong Type" });
+      }
+      if (roleNotInEnum) {
+        return res.status(400).json({ data: "Invalid role: Invalid Variant" });
+      }
+      await User.updateOne({ email }, { role });
+    }
+
+    res.status(200).json({ data: "User updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ data: "Error updating user" });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
   userLogout,
   userRole,
   userChangePassword,
-  userDelete
+  userDelete,
+  userUpdate
 };
