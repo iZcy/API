@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 const Lists = require("../models/listsModels");
-const Boards = require("../models/boardModels");  // Pastikan untuk mengimpor model Board
+const Cards = require("../models/cardModels"); // Import the Cards model
+const Boards = require("../models/boardModels");  // Import the Board model
 
 // GET all lists
 const listsGet = async (req, res) => {
   try {
-    // Menggunakan populate untuk mengambil data Board yang berhubungan dengan boardId
     const data = await Lists.find().populate("boardId");
     res.status(200).send(data);
   } catch (error) {
@@ -81,7 +81,7 @@ const listsPatch = async (req, res) => {
     if (boardId) {
       if (!mongoose.Types.ObjectId.isValid(boardId))
         return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
-      
+
       const boardExists = await Boards.findById(boardId);
       if (!boardExists) {
         return res.status(400).json({ data: "Board ID not found" });
@@ -107,6 +107,25 @@ const listsPatch = async (req, res) => {
   }
 };
 
+// Middleware to delete related cards when a list is deleted
+const deleteRelatedCards = async (req, res, next) => {
+  const { id } = req.body;
+
+  if (!id) return res.status(400).json({ data: "ID is required" });
+
+  // Check if the list exists
+  const list = await Lists.findById(id);
+  if (!list) {
+    return res.status(404).json({ data: "List not found" });
+  }
+
+  // Delete all related cards
+  await Cards.deleteMany({ listId: id }); // Ensure Cards model has a field listId
+
+  // Proceed to the next middleware or the deletion logic
+  next();
+};
+
 // DELETE a list
 const listsDelete = async (req, res) => {
   try {
@@ -128,9 +147,11 @@ const listsDelete = async (req, res) => {
   }
 };
 
+// Exporting all functions
 module.exports = {
   listsGet,
   listsPost,
   listsPatch,
-  listsDelete
+  listsDelete,
+  deleteRelatedCards // Export the middleware
 };
