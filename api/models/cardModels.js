@@ -1,6 +1,7 @@
 // models/taskModels.js
 const mongoose = require('mongoose');
 const { statusEnum } = require("../helper/enumerations");
+const { Schema } = mongoose;
 
 const cardSchema = new mongoose.Schema({
   title: {
@@ -12,7 +13,7 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   listId: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'List',  // Referensi ke Collection Lists
     required: true  // Setiap Card harus terkait dengan List
   },

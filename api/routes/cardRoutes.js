@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const cardController = require('../controllers/cardControllers');
+const cardControllers = require('../controllers/cardControllers');
 
 router
-  .get('/', cardController.getAllCards)
-  .post('/', cardController.createCard)
-  .patch('/:id', cardController.updateCard)
-  .delete('/:id', cardController.deleteCard);
-
-
+  .get('/', cardControllers.cardsGet)        // Menggunakan cardsGet untuk mendapatkan semua kartu
+  .post('/', cardControllers.cardsPost)      // Menggunakan cardsPost untuk membuat kartu baru
+  .patch('/:id', cardControllers.cardsPatch)  // Menggunakan cardsPatch untuk memperbarui kartu
+  .delete('/', cardControllers.cardsDelete);  // Menggunakan cardsDelete untuk menghapus kartu
 
 module.exports = router;
