@@ -20,10 +20,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", require("./routes/taskRoutes"));
 app.use("/task", require("./routes/taskRoutes"));
 app.use("/info", require("./routes/infoRoutes"));
+app.use("/board", require("./routes/boardRoutes"));
+app.use("/auth", require("./routes/authRoutes"));
+app.use("/lists", require("./routes/listsRoutes"));
+app.use("/comments", require("./routes/commentsRoutes"))
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Welcom to KanbanAPI`);
+  console.log(`Welcome to KanbanAPI`);
   console.log(`Server is running on port ${PORT}`);
   console.log(`Mode: ${process.env.NODE_ENV}`);
 });
