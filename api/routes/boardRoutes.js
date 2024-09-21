@@ -4,7 +4,8 @@ const boardController = require("../controllers/boardControllers");
 
 router
     .post("/", boardController.boardPost)
-    .get("/", boardController.boardGet);
-
+    .get("/", boardController.boardGet)
+    .patch("/", boardController.boardPatch)
+    .delete("/", boardController.boardDelete);
 
 module.exports = router;
