@@ -1,5 +1,4 @@
-const Card = require('../models/cardModels');
-const mongoose = require('mongoose');
+const Card = require("../models/cardModels");
 
 // Create a new card
 const cardsPost = async (req, res) => {
@@ -36,11 +35,10 @@ const cardsPost = async (req, res) => {
   }
 };
 
-
 // Get all cards
 const cardsGet = async (req, res) => {
   try {
-    const cards = await Card.find().populate('assignedTo');  // Populate users
+    const cards = await Card.find().populate("assignedTo"); // Populate users
     res.status(200).json(cards);
   } catch (error) {
     res.status(500).json({ data: "Failed to retrieve cards due to server error" });
@@ -58,21 +56,32 @@ const cardsPatch = async (req, res) => {
 
     // Check if the card ID is valid
     if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ error: "Card ID type must be ObjectId" });
+    if (!cardId)
+      return res.status(400).json({ message: "Card ID is required." });
+    if (!title && !status)
+      return res.status(400).json({
+        message: "At least one field (title or status) is required to update."
+      });
+
+    // Check if the card ID is valid
+    if (!mongoose.Types.ObjectId.isValid(cardId))
+      return res.status(400).json({ message: "Card ID type must be ObjectId" });
 
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
-      { title, status }, 
-      { new: true } 
+      { title, status },
+      { new: true }
     );
 
     if (!updatedCard) return res.status(404).json({ data: 'Card not found' });
+    if (!updatedCard)
+      return res.status(404).json({ message: "Card not found" });
 
     res.status(200).json(updatedCard);
   } catch (error) {
     res.status(400).json({ data: "Cannot update card" });
   }
 };
-
 
 // Delete a card
 const cardsDelete = async (req, res) => {
@@ -85,10 +94,15 @@ const cardsDelete = async (req, res) => {
     // Check if the card ID is valid
     if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ error: "Card ID type must be ObjectId" });
 
+    // Check if the card ID is valid
+    if (!mongoose.Types.ObjectId.isValid(cardId))
+      return res.status(400).json({ message: "Card ID type must be ObjectId" });
+
     const deletedCard = await Card.findByIdAndDelete(req.params.id);
-    if (!deletedCard) return res.status(404).json({ data: 'Card not found' });
-    res.status(200).json({ data: 'Card deleted successfully' });
-  } catch (error) {
+    if (!deletedCard)
+      return res.status(404).json({ message: "Card not found" });
+    res.status(200).json({ message: "Card deleted successfully" });
+ } catch (error) {
     res.status(500).json({ data: "Failed to delete card" });
   }
 };
