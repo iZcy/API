@@ -56,7 +56,7 @@ const commentsPatch = async (req, res) => {
   catch (error) {
     console.log(error);
     // res.status(500).send("Error updating comments");
-    res.status(500).send({ error: "Error updating comments" });
+    res.status(500).json({ error: "Error updating comments" });
   }
 };
 
