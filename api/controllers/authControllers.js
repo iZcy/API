@@ -201,9 +201,74 @@ const userRole = async (req, res) => {
   }
 };
 
+const userChangePassword = async (req, res) => {
+  try {
+    // Body parsing
+    const { email, oldPassword, newPassword } = req.body;
+
+    // Check Body Existence
+    if (!email) return res.status(400).json({ data: "Email is required" });
+
+    if (!oldPassword)
+      return res.status(400).json({ data: "Old password is required" });
+
+    if (!newPassword)
+      return res.status(400).json({ data: "New password is required" });
+
+    // Check Body Validity
+    const emailTooShort = email.length < 6;
+    const emailWrongType = typeof email !== "string";
+    if (emailWrongType) {
+      return res.status(400).json({ data: "Invalid email: Wrong Type" });
+    }
+    if (emailTooShort) {
+      return res.status(400).json({ data: "Invalid email: Too Short" });
+    }
+
+    const oldPasswordTooShort = oldPassword.length < 6;
+    const oldPasswordWrongType = typeof oldPassword !== "string";
+    if (oldPasswordWrongType) {
+      return res.status(400).json({ data: "Invalid old password: Wrong Type" });
+    }
+    if (oldPasswordTooShort) {
+      return res.status(400).json({ data: "Invalid old password: Too Short" });
+    }
+
+    const newPasswordTooShort = newPassword.length < 6;
+    const newPasswordWrongType = typeof newPassword !== "string";
+    if (newPasswordWrongType) {
+      return res.status(400).json({ data: "Invalid new password: Wrong Type" });
+    }
+    if (newPasswordTooShort) {
+      return res.status(400).json({ data: "Invalid new password: Too Short" });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ data: "User does not exist" });
+    }
+
+    const validPassword = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!validPassword) {
+      return res.status(400).json({ data: "Invalid old password" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    await User.updateOne({ email }, { passwordHash });
+    res.status(200).json({ data: "Password changed" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ data: "Error changing password" });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
   userLogout,
-  userRole
+  userRole,
+  userChangePassword
 };
