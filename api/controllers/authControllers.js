@@ -265,10 +265,60 @@ const userChangePassword = async (req, res) => {
   }
 };
 
+const userDelete = async (req, res) => {
+  try {
+    // Body parsing
+    const { email, password } = req.body;
+
+    // Check Body Existence
+    if (!email) return res.status(400).json({ data: "Email is required" });
+
+    if (!password)
+      return res.status(400).json({ data: "Password is required" });
+
+    // Check Body Validity
+    const emailTooShort = email.length < 6;
+    const emailWrongType = typeof email !== "string";
+    if (emailWrongType) {
+      return res.status(400).json({ data: "Invalid email: Wrong Type" });
+    }
+    if (emailTooShort) {
+      return res.status(400).json({ data: "Invalid email: Too Short" });
+    }
+
+    const passwordTooShort = password.length < 6;
+    const passwordWrongType = typeof password !== "string";
+    if (passwordWrongType) {
+      return res.status(400).json({ data: "Invalid password: Wrong Type" });
+    }
+    if (passwordTooShort) {
+      return res.status(400).json({ data: "Invalid password: Too Short" });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ data: "User does not exist" });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) {
+      return res.status(400).json({ data: "Invalid password" });
+    }
+
+    await User.deleteOne({ email });
+    res.status(200).json({ data: "User deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ data: "Error deleting user" });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
   userLogout,
   userRole,
-  userChangePassword
+  userChangePassword,
+  userDelete
 };
