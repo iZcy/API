@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Lists = require("../models/listsModels");
 const Cards = require("../models/cardModels");
+const Comment = require("../models/commentsModels"); // Import model Comment
 const Boards = require("../models/boardModels");
 
 // GET all lists
@@ -98,7 +99,7 @@ const listsPatch = async (req, res) => {
   }
 };
 
-// DELETE a list and related cards
+// DELETE a list and related cards and comments
 const listsDelete = async (req, res) => {
   try {
     const { id } = req.body;
@@ -112,12 +113,16 @@ const listsDelete = async (req, res) => {
     }
 
     // Delete all related cards
-    await Cards.deleteMany({ listID: id }); // Ensure Cards model has a field listID
+    const relatedCards = await Cards.find({ listId: id }); // Ensure Cards model has a field listId
+    await Cards.deleteMany({ listId: id });
+
+    // Delete all related comments for those cards
+    await Comment.deleteMany({ cardId: { $in: relatedCards.map(card => card._id) } }); // Assuming cardId in Comment model
 
     // Now delete the list
     await Lists.findByIdAndDelete(id);
 
-    res.status(200).json({ data: "List and related cards deleted" });
+    res.status(200).json({ data: "List, related cards, and comments deleted" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ data: "Error deleting List" });
