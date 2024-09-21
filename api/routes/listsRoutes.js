@@ -3,9 +3,9 @@ const router = express.Router();
 const listsController = require("../controllers/listsControllers");
 
 router
-  .get("/", listsController.listGet)
-  .post("/", listsController.listPost)
-  .patch("/", listsController.listPatch)
-  .delete("/", listsController.listDelete);
+  .get("/", listsController.listsGet)
+  .post("/", listsController.listsPost)
+  .patch("/", listsController.listsPatch)
+  .delete("/", listsController.listsDelete);
 
 module.exports = router;
