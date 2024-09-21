@@ -20,11 +20,36 @@ const cookiesOptionsGen = () => {
   return settings;
 };
 
-const nonAdminConstraint = async (userData, accountToAction, callback) => {
+const nonAdminConstraint = async (
+  userData,
+  accountToAction,
+  email,
+  password
+) => {
   const isNotAdmin = userData.role !== "admin";
   const isTargetAdmin = accountToAction.role === "admin";
   if (isNotAdmin || isTargetAdmin) {
-    return await callback();
+    // Check if current user is the account owner
+    if (userData.email !== email) {
+      return res.status(400).json({ data: "This account is not yours" });
+    }
+
+    if (!password)
+      return res.status(400).json({ data: "Password is required" });
+
+    const passwordTooShort = password.length < 6;
+    const passwordWrongType = typeof password !== "string";
+    if (passwordWrongType) {
+      return res.status(400).json({ data: "Invalid password: Wrong Type" });
+    }
+    if (passwordTooShort) {
+      return res.status(400).json({ data: "Invalid password: Too Short" });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) {
+      return res.status(400).json({ data: "Invalid password" });
+    }
   }
 };
 
@@ -279,10 +304,9 @@ const userChangePassword = async (req, res) => {
       return res.status(400).json({ data: "User does not exist" });
     }
 
-    const validPassword = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!validPassword) {
-      return res.status(400).json({ data: "Invalid old password" });
-    }
+    // If the to delete user is an admin, only himself can delete by providing the password
+    const resp = await nonAdminConstraint(userData, user, email, password);
+    if (resp) return resp;
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(newPassword, salt);
@@ -316,29 +340,7 @@ const userDelete = async (req, res) => {
     }
 
     // If the to delete user is an admin, only himself can delete by providing the password
-    const resp = await nonAdminConstraint(userData, user, async () => {
-      // Check if current user is the account owner
-      if (userData.email !== email) {
-        return res.status(400).json({ data: "This account is not yours" });
-      }
-
-      if (!password)
-        return res.status(400).json({ data: "Password is required" });
-
-      const passwordTooShort = password.length < 6;
-      const passwordWrongType = typeof password !== "string";
-      if (passwordWrongType) {
-        return res.status(400).json({ data: "Invalid password: Wrong Type" });
-      }
-      if (passwordTooShort) {
-        return res.status(400).json({ data: "Invalid password: Too Short" });
-      }
-
-      const validPassword = await bcrypt.compare(password, user.passwordHash);
-      if (!validPassword) {
-        return res.status(400).json({ data: "Invalid password" });
-      }
-    });
+    const resp = await nonAdminConstraint(userData, user, email, password);
     if (resp) return resp;
 
     await User.deleteOne({ email });
@@ -392,14 +394,9 @@ const userUpdate = async (req, res) => {
       return res.status(400).json({ data: "User does not exist" });
     }
 
-    // Validate password is true
-    if (!password)
-      return res.status(400).json({ data: "Password is required" });
-
-    const validPassword = await bcrypt.compare(password, user.passwordHash);
-    if (!validPassword) {
-      return res.status(400).json({ data: "Invalid password" });
-    }
+    // If the to delete user is an admin, only himself can delete by providing the password
+    const resp = await nonAdminConstraint(userData, user, email, password);
+    if (resp) return resp;
 
     if (username) {
       const usernameTooShort = username.length < 6;
