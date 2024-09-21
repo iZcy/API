@@ -41,9 +41,6 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 
 // Routes
-app.use("/", require("./routes/taskRoutes"));
-app.use("/task", require("./routes/taskRoutes"));
-app.use("/info", require("./routes/infoRoutes"));
 app.use("/board", require("./routes/boardRoutes"));
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/lists", require("./routes/listsRoutes"));
