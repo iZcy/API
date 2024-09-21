@@ -21,17 +21,6 @@ exports.getAllCards = async (req, res) => {
   }
 };
 
-// Get a single card by ID
-exports.getCardById = async (req, res) => {
-  try {
-    const card = await Card.findById(req.params.id).populate('assignedTo');
-    if (!card) return res.status(404).json({ message: 'Card not found' });
-    res.status(200).json(card);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 // Update a card
 exports.updateCard = async (req, res) => {
   try {

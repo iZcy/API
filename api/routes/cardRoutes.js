@@ -5,7 +5,6 @@ const cardController = require('../controllers/cardControllers');
 router
   .get('/', cardController.getAllCards)
   .post('/', cardController.createCard)
-  .get('/:id', cardController.getCardById)
   .patch('/:id', cardController.updateCard)
   .delete('/:id', cardController.deleteCard);
 
