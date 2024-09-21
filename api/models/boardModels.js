@@ -1,12 +1,15 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
+const enums = require("../helper/enumerations");
 
 const boardSchema = new mongoose.Schema({
-    boardId: {
+    title: {
         type: String,
         required: true
     },
-    title: {
-        type: String,
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     description: {
@@ -19,7 +22,7 @@ const boardSchema = new mongoose.Schema({
     visibility: {
         type: String,
         required: true,
-        enum: ["public", "private"]
+        enum: enums.visibilityEnum
     },
     createdAt: {
         type: Date,
