@@ -6,7 +6,7 @@ const listsGet = async (req, res) => {
     res.status(200).send(data);
   } catch (error) {
     console.log(error);
-    res.status(500).send("Error getting Listss");
+    res.status(500).send("Error getting Lists");
   }
 };
 
