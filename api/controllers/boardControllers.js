@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Board = require("../models/boardModels");
 const User = require("../models/userModels");
 const Lists = require('../models/listsModels');
 const enums = require("../helper/enumerations");
