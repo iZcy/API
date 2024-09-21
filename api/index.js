@@ -2,8 +2,30 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3500;
+
+// CORS
+const corsOptions = require("./helper/corsOptions");
+
+// Logger
+let morganLoggerMiddlewareForDevelopment;
+if (process.env.NODE_ENV === "development") {
+  morganLoggerMiddlewareForDevelopment = require("./middleware/morganMiddleware");
+}
+
+switch (process.env.NODE_ENV) {
+  case "development":
+    morganLoggerMiddlewareForDevelopment(app);
+    break;
+  case "production":
+    break;
+  default:
+    break;
+}
 
 // MongoDB connection
 const dbURI = process.env.DB_URI; // Replace with your MongoDB URI
@@ -13,8 +35,10 @@ mongoose
   .catch((err) => console.log("Error connecting to MongoDB:", err));
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors(corsOptions));
+app.use(cookieParser());
 
 // Routes
 app.use("/", require("./routes/taskRoutes"));
@@ -24,7 +48,7 @@ app.use("/board", require("./routes/boardRoutes"));
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
-app.use("/cards", require("./routes/cardRoutes"))
+app.use("/cards", require("./routes/cardRoutes"));
 //app.use("/lists", require("./routes/listsRoutes"));
 app.use("/comments", require("./routes/commentsRoutes"));
 
