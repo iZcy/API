@@ -33,5 +33,6 @@ const boardPost = async (req, res) => {
 };
 
 module.exports = {
-    boardPost
+    boardPost,
+    boardGet
 };
