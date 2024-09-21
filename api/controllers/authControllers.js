@@ -1,7 +1,7 @@
 const User = require("../models/userModels");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const roleEnum = require("../helpers/enumerations");
+const roleEnum = require("../helper/enumerations");
 
 //domain check
 const cookiesOptionsGen = () => {
