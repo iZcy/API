@@ -1,6 +1,6 @@
-const Task = require("../models/listsModels");
+const List = require("../models/listsModels");
 
-const taskGet = async (req, res) => {
+const listsGet = async (req, res) => {
   try {
     const data = await Task.find();
     res.status(200).send(data);
@@ -10,7 +10,7 @@ const taskGet = async (req, res) => {
   }
 };
 
-const taskPost = async (req, res) => {
+const listsPost = async (req, res) => {
   try {
     const { listId, title, boardId, position, createdBy } = req.body;
 
@@ -30,7 +30,7 @@ const taskPost = async (req, res) => {
   }
 };
 
-const taskPatch = async (req, res) => {
+const listsPatch = async (req, res) => {
   try {
     const { id, listId, title, boardId, position, createdBy } = req.body;
     const data = await Task.findById(id);
@@ -53,7 +53,7 @@ const taskPatch = async (req, res) => {
   }
 };
 
-const taskDelete = async (req, res) => {
+const listsDelete = async (req, res) => {
   try {
     const { id } = req.body;
     await Task.findByIdAndDelete(id);
@@ -66,8 +66,8 @@ const taskDelete = async (req, res) => {
 };
 
 module.exports = {
-  taskGet,
-  taskPost,
-  taskPatch,
-  taskDelete
+  listsGet,
+  listsPost,
+  listsPatch,
+  listsDelete
 };
