@@ -30,13 +30,13 @@ const commentsPost = async (req, res) => {
 
     // Check body existance
     if (!cardId) {
-      return res.status(400).json({ data: "cardId is required!"});
+      return res.status(400).json({ error: "cardId is required!"});
     }
     if (!userId) {
-      return res.status(400).json({ data: "userId is required!"});
+      return res.status(400).json({ error: "userId is required!"});
     }
     if (!content) {
-      return res.status(400).json({ data: "content is required!"});
+      return res.status(400).json({ error: "content is required!"});
     }
 
     // Check the data types
@@ -47,12 +47,12 @@ const commentsPost = async (req, res) => {
     // Check if cardId exists
     const card_check = await Card.findOne({ _id: cardId });
     if (!card_check) {
-      return res.status(400).json({ data: "cardId doesn't exist!"});
+      return res.status(400).json({ error: "cardId doesn't exist!"});
     }
     // Check if userId exists
     const user_check = await User.findOne({ _id: userId });
     if (!user_check) {
-      return res.status(400).json({ data: "userId doesn't exist!"});
+      return res.status(400).json({ error: "userId doesn't exist!"});
     }
 
     const newComments = new Comments({
@@ -64,7 +64,7 @@ const commentsPost = async (req, res) => {
     });
     await newComments.save();
     // res.status(200).send(newComments + " saved");
-    res.status(201).json({ data: "Comment created", comment: newComments });
+    res.status(201).json({ message: "Comment created", comment: newComments });
   }
   catch (error) {
     console.log(error);
@@ -82,16 +82,16 @@ const commentsPatch = async (req, res) => {
 
     // Check body existance
     if (!id) {
-      res.status(400).json({ data: "id is required!" });
+      res.status(400).json({ error: "id is required!" });
     }
     if (!cardId) {
-      res.status(400).json({ data: "cardId is required!" });
+      res.status(400).json({ error: "cardId is required!" });
     }
     if (!userId) {
-      res.status(400).json({ data: "userId is required!" });
+      res.status(400).json({ error: "userId is required!" });
     }
     if (!content) {
-      res.status(400).json({ data: "content is required!" });
+      res.status(400).json({ error: "content is required!" });
     }
 
     // Check the data types
@@ -103,17 +103,17 @@ const commentsPatch = async (req, res) => {
     // Check if id exists
     const id_check = await Comments.findOne({ id });
     if (!id_check) {
-      return res.status(400).json({ data: "id doesn't exist!"});
+      return res.status(400).json({ error: "id doesn't exist!"});
     }
     // Check if cardId exists
     const card_check = await Card.findOne({ _id: cardId });
     if (!card_check) {
-      return res.status(400).json({ data: "cardId doesn't exist!"});
+      return res.status(400).json({ error: "cardId doesn't exist!"});
     }
     // Check if userId exists
     const user_check = await User.findOne({ _id: userdId });
     if (!user_check) {
-      return res.status(400).json({ data: "userId doesn't exist!"});
+      return res.status(400).json({ error: "userId doesn't exist!"});
     }
 
     // Check if data is returned
@@ -128,7 +128,7 @@ const commentsPatch = async (req, res) => {
 
     await data.save();
     // res.status(200).send(data + " updated");
-    res.status(200).json({ data: "Comment updated", comment: data });
+    res.status(200).json({ message: "Comment updated", comment: data });
   }
   catch (error) {
     console.log(error);
@@ -145,7 +145,7 @@ const commentsDelete = async (req, res) => {
 
     // Check bddy existance
     if (!id) {
-      return res.status(404).json({ data: "id is required!" });
+      return res.status(404).json({ error: "id is required!" });
     }
 
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ data: "id type must be ObjectId"});
@@ -153,7 +153,7 @@ const commentsDelete = async (req, res) => {
     // Check if id exists
     const id_check = await Comments.findOne({ id });
     if (!id_check) {
-      return res.status(400).json({ data: "id doesn't exist!"});
+      return res.status(400).json({ error: "id doesn't exist!"});
     }
 
     // Check if result is returned
@@ -162,7 +162,7 @@ const commentsDelete = async (req, res) => {
     }
 
     // res.status(200).send("Task deleted");
-    res.status(200).json({ data: "Comment deleted" });
+    res.status(200).json({ message: "Comment deleted" });
   }
   catch (error) {
     console.log(error);
