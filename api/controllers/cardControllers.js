@@ -24,7 +24,7 @@ const cardsPost = async (req, res) => {
     const newCard = new Card({
       title,
       description,
-      listID: listId,
+      listId,
       assignedTo,
       status,
       createdAt,
