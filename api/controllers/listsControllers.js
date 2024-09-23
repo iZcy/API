@@ -6,8 +6,19 @@ const Boards = require("../models/boardModels");
 
 const listsGet = async (req, res) => {
   try {
+    const { boardId } = req.params;
+    // check boardId is valid
+    const boardExists = await Boards.findById(boardId);
+    if (!boardExists) {
+      return res.status(400).json({ data: "Board ID not found" });
+    }
+
     const data = await Lists.find().populate("boardId");
-    res.status(200).send(data);
+    console.log(data);
+    console.log(boardId);
+    data = data.filter((list) => list.boardId._id === boardId);
+
+    res.status(200).send(data || []);
   } catch (error) {
     console.log(error);
     res.status(500).send("Error getting Lists");
@@ -16,18 +27,23 @@ const listsGet = async (req, res) => {
 
 const listsPost = async (req, res) => {
   try {
-    const { title, boardId, position, createdBy } = req.body;
+    const { boardId } = req.params;
+    const { title, position, createdBy } = req.body;
 
     if (!title) return res.status(400).json({ data: "Title is required" });
     if (!boardId) return res.status(400).json({ data: "Board ID is required" });
-    if (!position) return res.status(400).json({ data: "Position is required" });
-    if (!createdBy) return res.status(400).json({ data: "CreatedBy is required" });
+    if (!position)
+      return res.status(400).json({ data: "Position is required" });
+    if (!createdBy)
+      return res.status(400).json({ data: "CreatedBy is required" });
 
     if (typeof title !== "string")
       return res.status(400).json({ data: "Invalid title: Wrong Type" });
 
     if (!mongoose.Types.ObjectId.isValid(boardId))
-      return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
+      return res
+        .status(400)
+        .json({ data: "Invalid boardId: Must be a valid ObjectId" });
 
     if (typeof position !== "number")
       return res.status(400).json({ data: "Invalid position: Wrong Type" });
@@ -56,8 +72,8 @@ const listsPost = async (req, res) => {
 
 const listsPatch = async (req, res) => {
   try {
-    const { title, boardId, position, createdBy } = req.body;
     const { id } = req.params;
+    const { title, boardId, position, createdBy } = req.body;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
@@ -71,7 +87,9 @@ const listsPatch = async (req, res) => {
 
     if (boardId) {
       if (!mongoose.Types.ObjectId.isValid(boardId))
-        return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
+        return res
+          .status(400)
+          .json({ data: "Invalid boardId: Must be a valid ObjectId" });
 
       const boardExists = await Boards.findById(boardId);
       if (!boardExists) {
@@ -111,8 +129,10 @@ const listsDelete = async (req, res) => {
     const relatedCards = await Cards.find({ listId: id });
     await Cards.deleteMany({ listId: id });
 
-    await Comment.deleteMany({ cardId: { $in: relatedCards.map(card => card._id) } });
-    
+    await Comment.deleteMany({
+      cardId: { $in: relatedCards.map((card) => card._id) }
+    });
+
     await Lists.findByIdAndDelete(id);
 
     res.status(200).json({ data: "List, related cards, and comments deleted" });
@@ -126,5 +146,5 @@ module.exports = {
   listsGet,
   listsPost,
   listsPatch,
-  listsDelete,
+  listsDelete
 };

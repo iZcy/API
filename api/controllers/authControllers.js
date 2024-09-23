@@ -206,7 +206,14 @@ const userLogin = async (req, res) => {
     res
       .status(200)
       .cookie(cookieName, token, cookiesOptionsGen())
-      .json({ data: "Logged in" });
+      .json({
+        data: "Logged in",
+        user: {
+          username: user.username,
+          email: user.email,
+          role: user.role
+        }
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ data: "Error logging in" });

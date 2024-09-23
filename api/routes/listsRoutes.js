@@ -3,9 +3,9 @@ const router = express.Router();
 const listsController = require("../controllers/listsControllers");
 
 router
-  .get("/", listsController.listsGet)
-  .post("/", listsController.listsPost)
-  .patch("/", listsController.listsPatch)
-  .delete("/", listsController.listsDelete);
+  .get("/:boardId", listsController.listsGet)
+  .post("/:boardId", listsController.listsPost)
+  .patch("/:id", listsController.listsPatch)
+  .delete("/:id", listsController.listsDelete);
 
 module.exports = router;
