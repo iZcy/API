@@ -154,7 +154,7 @@ const boardDelete = async (req, res) => {
       return res.status(400).json({ message: "Invalid Board ID" });
     }
 
-    const board = await Board.findById(id);
+    const board = await Board.findById(id).populate("userId", "username");
     if (!board) {
       return res.status(404).json({ message: "Board not found" });
     }
@@ -166,8 +166,18 @@ const boardDelete = async (req, res) => {
         .json({ message: "Forbidden: You do not own this board" });
     }
 
-    await Board.findByIdAndDelete(id); // Delete the board
-    res.status(200).json({ message: "Board deleted", board });
+    await Board.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Board deleted",
+      data: {
+        _id: board._id,
+        title: board.title,
+        description: board.description,
+        visibility: board.visibility,
+        createdBy: board.userId.username // Fetch username from populated userId
+      }
+    });
   } catch (error) {
     console.error("Error deleting board:", error);
     res.status(500).json({ message: "Error deleting board" });
