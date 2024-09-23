@@ -11,14 +11,14 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  listID: {
+  listId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'List',  // Referensi ke Collection Lists
+    ref: 'Lists',  // Referensi ke Collection Lists
     required: true  // Setiap Card harus terkait dengan List
   },
   assignedTo: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
+    ref: 'Users'  // Array referensi ke Users (bisa lebih dari satu pengguna)
   }],
   status: {
     type: String,
