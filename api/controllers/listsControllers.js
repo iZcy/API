@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 const Lists = require("../models/listsModels");
 const Cards = require("../models/cardModels");
-const Comment = require("../models/commentsModels"); // Import model Comment
+const Comment = require("../models/commentsModels");
 const Boards = require("../models/boardModels");
 
-// GET all lists
 const listsGet = async (req, res) => {
   try {
     const data = await Lists.find().populate("boardId");
@@ -15,7 +14,6 @@ const listsGet = async (req, res) => {
   }
 };
 
-// POST a new list
 const listsPost = async (req, res) => {
   try {
     const { title, boardId, position, createdBy } = req.body;
@@ -45,7 +43,7 @@ const listsPost = async (req, res) => {
       title,
       boardId,
       position,
-      createdBy,
+      createdBy
     });
 
     await newList.save();
@@ -56,7 +54,6 @@ const listsPost = async (req, res) => {
   }
 };
 
-// PATCH an existing list using req.params for the list ID
 const listsPatch = async (req, res) => {
   try {
     const { title, boardId, position, createdBy } = req.body;
@@ -100,27 +97,22 @@ const listsPatch = async (req, res) => {
   }
 };
 
-// DELETE a list and related cards and comments using req.params for the list ID
 const listsDelete = async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
-    // Check if the list exists
     const list = await Lists.findById(id);
     if (!list) {
       return res.status(404).json({ data: "List not found" });
     }
 
-    // Delete all related cards
     const relatedCards = await Cards.find({ listId: id });
     await Cards.deleteMany({ listId: id });
 
-    // Delete all related comments for those cards
     await Comment.deleteMany({ cardId: { $in: relatedCards.map(card => card._id) } });
-
-    // Now delete the list
+    
     await Lists.findByIdAndDelete(id);
 
     res.status(200).json({ data: "List, related cards, and comments deleted" });
