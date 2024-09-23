@@ -1,5 +1,6 @@
 const Card = require("../models/cardModels");
-const List = require("../models/listsModels")
+const List = require("../models/listsModels");
+const User = require("../models/userModels");
 
 // Create a new card
 const cardsPost = async (req, res) => {
@@ -45,7 +46,8 @@ const cardsGet = async (req, res) => {
     const cards = await Card.find().populate("assignedTo"); // Populate users
     res.status(200).json(cards);
   } catch (error) {
-    res.status(500).json({ data: "Failed to retrieve cards due to server error" });
+    console.error("Error retrieving cards:", error);  // Log the actual error
+    res.status(500).json({ data: "Failed to retrieve cards due to server error", details: error.message });
   }
 };
 
