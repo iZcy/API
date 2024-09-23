@@ -45,7 +45,7 @@ const listsPost = async (req, res) => {
       title,
       boardId,
       position,
-      createdBy
+      createdBy,
     });
 
     await newList.save();
@@ -56,10 +56,11 @@ const listsPost = async (req, res) => {
   }
 };
 
-// PATCH an existing list
+// PATCH an existing list using req.params for the list ID
 const listsPatch = async (req, res) => {
   try {
-    const { id, title, boardId, position, createdBy } = req.body;
+    const { title, boardId, position, createdBy } = req.body;
+    const { id } = req.params;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
@@ -99,10 +100,10 @@ const listsPatch = async (req, res) => {
   }
 };
 
-// DELETE a list and related cards and comments
+// DELETE a list and related cards and comments using req.params for the list ID
 const listsDelete = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
@@ -113,11 +114,11 @@ const listsDelete = async (req, res) => {
     }
 
     // Delete all related cards
-    const relatedCards = await Cards.find({ listId: id }); // Ensure Cards model has a field listId
+    const relatedCards = await Cards.find({ listId: id });
     await Cards.deleteMany({ listId: id });
 
     // Delete all related comments for those cards
-    await Comment.deleteMany({ cardId: { $in: relatedCards.map(card => card._id) } }); // Assuming cardId in Comment model
+    await Comment.deleteMany({ cardId: { $in: relatedCards.map(card => card._id) } });
 
     // Now delete the list
     await Lists.findByIdAndDelete(id);
