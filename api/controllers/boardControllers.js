@@ -27,8 +27,17 @@ const deleteListsMiddleware = async (req, res, next) => {
 const boardGet = async (req, res) => {
   try {
     const userId = req.user._id;
-    const data = await Board.find({ userId }).populate("userId", "username");
-    res.status(200).json(data);
+    const boards = await Board.find({ userId }).populate("userId", "username");
+
+    const data = boards.map((board) => ({
+      _id: board._id,
+      title: board.title,
+      createdBy: board.userId.username,
+      description: board.description,
+      visibility: board.visibility,
+    }));
+
+    res.status(200).json({ message: "Boards retrieved", data });
   } catch (error) {
     console.error("Error retrieving boards:", error);
     res.status(500).json({ message: "Error retrieving boards" });
@@ -44,7 +53,6 @@ const boardPost = async (req, res) => {
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
     // Validation checks
-
     if (!title) return res.status(400).json({ message: "Title is required" });
     if (!visibility)
       return res.status(400).json({ message: "Visibility is required" });
@@ -75,7 +83,15 @@ const boardPost = async (req, res) => {
     });
 
     await newBoard.save();
-    res.status(201).json({ message: "Board created", data: newBoard });
+    res.status(201).json({
+      message: "Board created",
+      data: {
+        title: newBoard.title,
+        description: newBoard.description,
+        visibility: newBoard.visibility,
+        createdBy: userExists.username,
+      },
+    });
   } catch (error) {
     console.error("Error saving board:", error);
     if (error.name === "ValidationError") {
@@ -97,7 +113,7 @@ const boardPatch = async (req, res) => {
         .status(400)
         .json({ message: "Invalid boardId: Must be a valid ObjectId" });
 
-    const board = await Board.findById(id);
+    const board = await Board.findById(id).populate("userId", "username");
     if (!board) {
       return res.status(404).json({ message: "Board not found" });
     }
@@ -113,7 +129,17 @@ const boardPatch = async (req, res) => {
     board.visibility = visibility || board.visibility;
 
     await board.save();
-    res.status(200).json({ message: "Board updated", board });
+
+    res.status(200).json({
+      message: "Board updated",
+      data: {
+        _id: board._id,
+        title: board.title,
+        description: board.description,
+        visibility: board.visibility,
+        createdBy: board.userId.username
+      } 
+    });
   } catch (error) {
     console.error("Error updating board:", error);
     res.status(500).json({ message: "Error updating board" });
