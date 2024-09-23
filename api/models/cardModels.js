@@ -18,7 +18,7 @@ const cardSchema = new mongoose.Schema({
   },
   assignedTo: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users'  // Array referensi ke Users (bisa lebih dari satu pengguna)
+    ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
   }],
   status: {
     type: String,
