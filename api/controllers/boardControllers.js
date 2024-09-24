@@ -3,6 +3,7 @@ const User = require("../models/userModels");
 const Board = require("../models/boardModels");
 const Lists = require("../models/listsModels");
 const enums = require("../helper/enumerations");
+const listController = require("../controllers/listsControllers");
 
 const deleteListsMiddleware = async (req, res, next) => {
   try {
@@ -23,6 +24,7 @@ const deleteListsMiddleware = async (req, res, next) => {
       .json({ message: "Error deleting lists related to the board" });
   }
 };
+
 
 const boardGet = async (req, res) => {
   try {
@@ -166,6 +168,10 @@ const boardDelete = async (req, res) => {
         .json({ message: "Forbidden: You do not own this board" });
     }
 
+    //Find all list within the board 
+    const data = await Lists.find(id);
+
+    data.map((list) => listController.)
     await Board.findByIdAndDelete(id);
 
     res.status(200).json({
