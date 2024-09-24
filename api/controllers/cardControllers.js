@@ -28,15 +28,11 @@ const cardsPost = async (req, res) => {
 
     // Check body existence
     if (!title) return res.status(400).json({ data: "Title is required." });
-    if (!description)
-      return res.status(400).json({ data: "Description is required." });
+    if (!description) return res.status(400).json({ data: "Description is required." });
     if (!listId) return res.status(400).json({ data: "List ID is required." });
-    if (!assignedTo)
-      return res.status(400).json({ data: "Assigned To is required." });
-    if (!createdAt)
-      return res.status(400).json({ data: "Created At is required." });
-    if (!dueDate)
-      return res.status(400).json({ data: "Due Date is required." });
+    if (!assignedTo) return res.status(400).json({ data: "Assigned To is required." });
+    if (!createdAt) return res.status(400).json({ data: "Created At is required." });
+    if (!dueDate) return res.status(400).json({ data: "Due Date is required." });
 
     // Check the data types
     const list = await List.findById(listId);
