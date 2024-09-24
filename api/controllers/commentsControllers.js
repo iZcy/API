@@ -26,6 +26,35 @@ const commentsGet = async (req, res) => {
   }
 };
 
+const commnentsGetById = async (req, res) => {
+  try {
+    // Get the commenet id from the request param
+    const { id } = req.params;
+
+    // Check body existance
+    if (!id) return res.status(400).json({ error: "id is required!" });
+
+    // Check id data type
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ data: "id type must be ObjectId" });
+
+    // Find the comment by the id
+    const comment = await Comments.findById(id);
+
+    // If no comment is found, return false
+    if (!comment) return res.status(404).json({error: "Comment not found!"});
+
+    // If success
+    res.status(200).json({ data: comment});
+  }
+  catch (error) {
+    console.log("Error retrieving comment by id:", error);
+
+    // Return a 500 status if an error occurs
+    res.status(500).json({ error: "Error retrieving comment"})
+  }
+}
+
 const commentsPost = async (req, res) => {
   try {
     // Body parsing
@@ -157,7 +186,8 @@ module.exports = {
   commentsPost,
   commentsPatch,
   commentsDelete,
-  deleteAllByCardId
+  deleteAllByCardId,
+  commnentsGetById
 };
 
-// Add dthis comment
+// Add dthis commentgit

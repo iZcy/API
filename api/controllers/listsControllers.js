@@ -32,9 +32,12 @@ const listsGet = async (req, res) => {
     // Find lists where boardId matches the provided boardId
     const data = await Lists.find({ boardId }).populate("boardId");
 
+    data = data.filter(
+      (list) => list.boardId && list.boardId._id.toString() === boardId
+    );
     res.status(200).json({ data });
   } catch (error) {
-    console.error("Error getting Lists: ", error);  // More detailed error log
+    console.error("Error getting Lists: ", error); // More detailed error log
     res.status(500).json({ data: `Error getting Lists: ${error.message}` });
   }
 };
@@ -123,21 +126,22 @@ const listsPatch = async (req, res) => {
 
 const listsDelete = async (req, res) => {
   try {
-    const cardId = req.params.id;
+    const listId = req.params.id;
 
     // Check if the list ID is provided
     if (!listId) return res.status(400).json({ error: "list ID is required." });
 
     // Check if the list ID is valid
-    const list = await List.findById(listId);
+    const list = await Lists.findById(listId);
     if (!list)
       return res.status(400).json({ data: "ID is not a valid List ID." });
 
-    const deletedList = await List.findByIdAndDelete(req.params.id);
+    const deletedList = await Lists.findByIdAndDelete(req.params.id);
     if (!deletedList)
       return res.status(404).json({ message: "List not found" });
     res.status(200).json({ message: "List deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ data: "Failed to delete list" });
   }
 };
