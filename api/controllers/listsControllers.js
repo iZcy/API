@@ -27,12 +27,14 @@ const listsGet = async (req, res) => {
 
 const listsPost = async (req, res) => {
   try {
+    const user = req.user;
+    const createdBy = user._id;
     const { boardId } = req.params;
-    const { title, position, createdBy } = req.body;
+    const { title, position } = req.body;
 
     if (!title) return res.status(400).json({ data: "Title is required" });
     if (!boardId) return res.status(400).json({ data: "Board ID is required" });
-    if (!position)
+    if (!position && position !== 0)
       return res.status(400).json({ data: "Position is required" });
     if (!createdBy)
       return res.status(400).json({ data: "CreatedBy is required" });
@@ -72,8 +74,10 @@ const listsPost = async (req, res) => {
 
 const listsPatch = async (req, res) => {
   try {
+    const user = req.user;
+    const createdBy = user._id;
     const { id } = req.params;
-    const { title, boardId, position, createdBy } = req.body;
+    const { title, boardId, position } = req.body;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
