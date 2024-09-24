@@ -1,7 +1,6 @@
 const Card = require("../models/cardModels");
 const List = require("../models/listsModels");
-const User = require("../models/userModels");
-import { deleteAllByCardId } from "./commentsControllers";
+const { deleteAllByCardId } = require("./commentsControllers");
 
 const deleteAllByListId = async (listId) => {
   try {
@@ -147,5 +146,6 @@ module.exports = {
   cardsPost,
   cardsGet,
   cardsPatch,
-  cardsDelete
+  cardsDelete,
+  deleteAllByListId
 };
