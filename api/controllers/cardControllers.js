@@ -7,7 +7,7 @@ const deleteAllByListId = async (listId) => {
     // Find all card with the listId
     const data = await Card.find({ listId });
     // map all the cardId and kill all comment
-    data.map((card) => deleteAllByCardId(card._id));
+    data.map((card) => commentController.deleteAllByCardId(card._id));
     // kill all card
     await Card.deleteMany({ listId });
 
