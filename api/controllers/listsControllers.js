@@ -13,22 +13,18 @@ const listsGet = async (req, res) => {
       return res.status(400).json({ data: "Board ID not found" });
     }
 
-    const data = await Lists.find().populate("boardId");
-    console.log(data);
-    console.log(boardId);
-    data = data.filter((list) => list.boardId._id === boardId);
+    let data = await Lists.find().populate("boardId");
 
-    res.status(200).send(data || []);
+    data = data.filter((list) => list.boardId._id.toString() === boardId);
+    res.status(200).json({ data });
   } catch (error) {
     console.log(error);
-    res.status(500).send("Error getting Lists");
+    res.status(500).json({ data: "Error getting Lists" });
   }
 };
 
 const listsPost = async (req, res) => {
   try {
-    const user = req.user;
-    const createdBy = user._id;
     const { boardId } = req.params;
     const { title, position } = req.body;
 
@@ -36,8 +32,6 @@ const listsPost = async (req, res) => {
     if (!boardId) return res.status(400).json({ data: "Board ID is required" });
     if (!position && position !== 0)
       return res.status(400).json({ data: "Position is required" });
-    if (!createdBy)
-      return res.status(400).json({ data: "CreatedBy is required" });
 
     if (typeof title !== "string")
       return res.status(400).json({ data: "Invalid title: Wrong Type" });
@@ -49,8 +43,6 @@ const listsPost = async (req, res) => {
 
     if (typeof position !== "number")
       return res.status(400).json({ data: "Invalid position: Wrong Type" });
-    if (typeof createdBy !== "string")
-      return res.status(400).json({ data: "Invalid createdBy: Wrong Type" });
 
     const boardExists = await Boards.findById(boardId);
     if (!boardExists) {
@@ -60,8 +52,7 @@ const listsPost = async (req, res) => {
     const newList = new Lists({
       title,
       boardId,
-      position,
-      createdBy
+      position
     });
 
     await newList.save();
@@ -74,8 +65,6 @@ const listsPost = async (req, res) => {
 
 const listsPatch = async (req, res) => {
   try {
-    const user = req.user;
-    const createdBy = user._id;
     const { id } = req.params;
     const { title, boardId, position } = req.body;
 
@@ -103,13 +92,10 @@ const listsPatch = async (req, res) => {
 
     if (position && typeof position !== "number")
       return res.status(400).json({ data: "Invalid position: Wrong Type" });
-    if (createdBy && typeof createdBy !== "string")
-      return res.status(400).json({ data: "Invalid createdBy: Wrong Type" });
 
     data.title = title || data.title;
     data.boardId = boardId || data.boardId;
     data.position = position || data.position;
-    data.createdBy = createdBy || data.createdBy;
 
     await data.save();
     res.status(200).json({ data: "List updated" });
