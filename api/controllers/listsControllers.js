@@ -22,19 +22,20 @@ const deleteAllByBoardId = async (boardId) => {
 const listsGet = async (req, res) => {
   try {
     const { boardId } = req.params;
-    // check boardId is valid
+
+    // Check if boardId is valid
     const boardExists = await Boards.findById(boardId);
     if (!boardExists) {
       return res.status(400).json({ data: "Board ID not found" });
     }
 
-    let data = await Lists.find().populate("boardId");
+    // Find lists where boardId matches the provided boardId
+    const data = await Lists.find({ boardId }).populate("boardId");
 
-    data = data.filter((list) => list.boardId._id.toString() === boardId);
     res.status(200).json({ data });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ data: "Error getting Lists" });
+    console.error("Error getting Lists: ", error);  // More detailed error log
+    res.status(500).json({ data: `Error getting Lists: ${error.message}` });
   }
 };
 
