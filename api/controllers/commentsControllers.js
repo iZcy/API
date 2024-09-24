@@ -51,7 +51,7 @@ const commentsPost = async (req, res) => {
     });
     
     await newComments.save();
-    res.status(201).json({ message: "Comment created", comment: newComments });
+    res.status(201).json({ message: "Comment created", data: newComments });
   }
   catch (error) {
     console.log(error);
@@ -100,7 +100,7 @@ const commentsPatch = async (req, res) => {
     data.isEdited = true;
 
     await data.save();
-    res.status(200).json({ message: "Comment updated", comment: data });
+    res.status(200).json({ message: "Comment updated", data: data });
   }
   catch (error) {
     console.log(error);
@@ -125,7 +125,7 @@ const commentsDelete = async (req, res) => {
     // Check if result is returned
     if (!result) return res.status(404).json({ error: "Comment not found" });
 
-    res.status(200).json({ message: "Comment deleted" });
+    res.status(200).json({ message: "Comment deleted", data: result });
   }
   catch (error) {
     console.log(error);
