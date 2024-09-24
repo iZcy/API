@@ -147,7 +147,6 @@ module.exports = {
   cardsGet,
   cardsPatch,
   cardsDelete,
-  deleteAllByListId
-  cardsDelete,
-  deleteAllByListId
+  deleteAllByListId,
+  cardsDelete
 };
