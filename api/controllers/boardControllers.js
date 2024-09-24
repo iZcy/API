@@ -171,7 +171,8 @@ const boardDelete = async (req, res) => {
     //Find all list within the board 
     const data = await Lists.find(id);
 
-    data.map((list) => listController.)
+    data.map((list) => listController.deleteAllByBoardId(list._id));
+
     await Board.findByIdAndDelete(id);
 
     res.status(200).json({
