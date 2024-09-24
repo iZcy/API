@@ -1,44 +1,42 @@
 // models/taskModels.js
-const mongoose = require('mongoose');
-const enums = require('../helper/enumerations');
+const mongoose = require("mongoose");
+const enums = require("../helper/enumerations");
 
 const cardSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: true
   },
   description: {
     type: String,
-    required: true,
+    required: true
   },
   listId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Lists',  // Referensi ke Collection Lists
-    required: true  // Setiap Card harus terkait dengan List
+    ref: "Lists", // Referensi ke Collection Lists
+    required: true // Setiap Card harus terkait dengan List
   },
-  assignedTo: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'  // Array referensi ke Users (bisa lebih dari satu pengguna)
-  }],
+  assignedTo: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User" // Array referensi ke Users (bisa lebih dari satu pengguna)
+    }
+  ],
   status: {
     type: String,
-    enum: enums.statusEnum,  
-    default: 'to-do'  
+    enum: enums.statusEnum,
+    default: "to-do"
   },
   createdAt: {
     type: Date,
-    default: Date.now  
+    default: Date.now
   },
   dueDate: {
     type: Date,
-    required: false  
+    required: true
   }
 });
 
-const Card = mongoose.model('Card', cardSchema);
+const Card = mongoose.model("Card", cardSchema);
 
 module.exports = Card;
-
-
-
-

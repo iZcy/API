@@ -4,9 +4,9 @@ const router = express.Router();
 const commentsController = require("../controllers/commentsControllers");
 
 router
-  .get("/", commentsController.commentsGet)
-  .post("/", commentsController.commentsPost)
-  .patch("/", commentsController.commentsPatch)
-  .delete("/", commentsController.commentsDelete);
+  .get("/:cardId", commentsController.commentsGet)
+  .post("/:cardId", commentsController.commentsPost)
+  .patch("/:id", commentsController.commentsPatch)
+  .delete("/:id", commentsController.commentsDelete);
 
 module.exports = router;
