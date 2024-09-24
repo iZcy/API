@@ -1,8 +1,23 @@
 const mongoose = require("mongoose");
 const Lists = require("../models/listsModels");
-const Cards = require("../models/cardModels");
-const Comment = require("../models/commentsModels");
 const Boards = require("../models/boardModels");
+const { deleteAllByListId } = require("./cardControllers");
+
+const deleteAllByBoardId = async (boardId) => {
+  try {
+    // Find all list with the boardId
+    const data = await List.find({ boardId });
+    // map all the listId and kill all card
+    data.map((list) => deleteAllByListId(list._id));
+    // kill all list
+    await List.deleteMany({ boardId });
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
 
 const listsGet = async (req, res) => {
   try {
@@ -107,28 +122,22 @@ const listsPatch = async (req, res) => {
 
 const listsDelete = async (req, res) => {
   try {
-    const { id } = req.params;
+    const cardId = req.params.id;
 
-    if (!id) return res.status(400).json({ data: "ID is required" });
+    // Check if the list ID is provided
+    if (!listId) return res.status(400).json({ error: "list ID is required." });
 
-    const list = await Lists.findById(id);
-    if (!list) {
-      return res.status(404).json({ data: "List not found" });
-    }
+    // Check if the list ID is valid
+    const list = await List.findById(listId);
+    if (!list)
+      return res.status(400).json({ data: "ID is not a valid List ID." });
 
-    const relatedCards = await Cards.find({ listId: id });
-    await Cards.deleteMany({ listId: id });
-
-    await Comment.deleteMany({
-      cardId: { $in: relatedCards.map((card) => card._id) }
-    });
-
-    await Lists.findByIdAndDelete(id);
-
-    res.status(200).json({ data: "List, related cards, and comments deleted" });
+    const deletedList = await List.findByIdAndDelete(req.params.id);
+    if (!deletedList)
+      return res.status(404).json({ message: "List not found" });
+    res.status(200).json({ message: "List deleted successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ data: "Error deleting List" });
+    res.status(500).json({ data: "Failed to delete list" });
   }
 };
 
@@ -136,5 +145,6 @@ module.exports = {
   listsGet,
   listsPost,
   listsPatch,
-  listsDelete
+  listsDelete,
+  deleteAllByBoardId
 };

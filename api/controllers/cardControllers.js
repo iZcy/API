@@ -1,8 +1,6 @@
 const Card = require("../models/cardModels");
 const List = require("../models/listsModels");
-const User = require("../models/userModels");
-const { default: mongoose } = require("mongoose");
-const commentController = require("../controllers/commentsControllers")
+const { deleteAllByCardId } = require("./commentsControllers");
 
 const deleteAllByListId = async (listId) => {
   try {
@@ -148,6 +146,8 @@ module.exports = {
   cardsPost,
   cardsGet,
   cardsPatch,
+  cardsDelete,
+  deleteAllByListId
   cardsDelete,
   deleteAllByListId
 };
