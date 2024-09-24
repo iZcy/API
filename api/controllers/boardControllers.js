@@ -152,10 +152,12 @@ const boardDelete = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Check if the provided ID is valid
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid Board ID" });
     }
 
+    // Fetch the board, populating the userId to get the username
     const board = await Board.findById(id).populate("userId", "username");
     if (!board) {
       return res.status(404).json({ message: "Board not found" });
@@ -163,18 +165,14 @@ const boardDelete = async (req, res) => {
 
     // Check authorization
     if (!board.userId.equals(req.user._id)) {
-      return res
-        .status(403)
-        .json({ message: "Forbidden: You do not own this board" });
+      return res.status(403).json({ message: "Forbidden: You do not own this board" });
     }
 
-    //Find all list within the board 
-    const data = await Lists.find(id);
-
-    data.map((list) => listController.deleteAllByBoardId(list._id));
-
+    listController.deleteAllByBoardId(id);
+    // Delete the board itself
     await Board.findByIdAndDelete(id);
 
+    // Send success response
     res.status(200).json({
       message: "Board deleted",
       data: {
@@ -182,11 +180,12 @@ const boardDelete = async (req, res) => {
         title: board.title,
         description: board.description,
         visibility: board.visibility,
-        createdBy: board.userId.username // Fetch username from populated userId
+        createdBy: board.userId.username
       }
     });
   } catch (error) {
-    console.error("Error deleting board:", error);
+    // Log the error for debugging
+    console.error("Error deleting board:", error.message || error);
     res.status(500).json({ message: "Error deleting board" });
   }
 };
