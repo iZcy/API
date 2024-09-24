@@ -30,7 +30,7 @@ const listsGet = async (req, res) => {
     }
 
     // Find lists where boardId matches the provided boardId
-    const data = await Lists.find({ boardId }).populate("boardId");
+    let data = await Lists.find({ boardId }).populate("boardId");
 
     data = data.filter(
       (list) => list.boardId && list.boardId._id.toString() === boardId
