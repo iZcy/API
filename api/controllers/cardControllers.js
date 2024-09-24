@@ -1,14 +1,14 @@
 const Card = require("../models/cardModels");
 const List = require("../models/listsModels");
 const User = require("../models/userModels");
-import { deleteAllByCardId } from "./commentsControllers";
+const commentController = require("../controllers/commentsControllers")
 
 const deleteAllByListId = async (listId) => {
   try {
     // Find all card with the listId
     const data = await Card.find({ listId });
     // map all the cardId and kill all comment
-    data.map((card) => deleteAllByCardId(card._id));
+    data.map((card) => commentController.deleteAllByCardId(card._id));
     // kill all card
     await Card.deleteMany({ listId });
 
