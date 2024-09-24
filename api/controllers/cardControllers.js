@@ -1,6 +1,23 @@
 const Card = require("../models/cardModels");
 const List = require("../models/listsModels");
 const User = require("../models/userModels");
+import { deleteAllByCardId } from "./commentsControllers";
+
+const deleteAllByListId = async (listId) => {
+  try {
+    // Find all card with the listId
+    const data = await Card.find({ listId });
+    // map all the cardId and kill all comment
+    data.map((card) => deleteAllByCardId(card._id));
+    // kill all card
+    await Card.deleteMany({ listId });
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
 
 // Create a new card
 const cardsPost = async (req, res) => {
