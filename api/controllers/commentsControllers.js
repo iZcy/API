@@ -186,7 +186,8 @@ module.exports = {
   commentsPost,
   commentsPatch,
   commentsDelete,
-  deleteAllByCardId
+  deleteAllByCardId,
+  commnentsGetById
 };
 
 // Add dthis commentgit
