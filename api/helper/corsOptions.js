@@ -1,16 +1,20 @@
+const allowedOrigins =
+  process.env.NODE_ENV === "development"
+    ? ["http://localhost:3000", undefined] // undefined allows Postman and anonymous access
+    : [process.env.FE_URL, undefined];
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Temporarily allow all origins for testing
-    if (
-      !origin ||
-      allowedOrigins.includes(origin) ||
-      process.env.NODE_ENV === "production"
-    ) {
+    // Allow requests with no origin (like mobile apps, Postman, etc.) or from allowed origins
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error("CORS not allowed"));
+      console.error(`CORS error: Origin ${origin} not allowed`);
+      callback(new Error(`${origin} Not allowed by CORS`));
     }
   },
-  credentials: true,
-  optionsSuccessStatus: 200
+  credentials: true, // Ensure credentials are allowed
+  optionsSuccessStatus: 200 // Response status for successful preflight requests
 };
+
+module.exports = corsOptions;
