@@ -27,5 +27,10 @@
     "morgan": "^1.10.0",
     "nodemon": "^3.1.7",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-plugin-markdown": "^5.1.0",
+    "eslint-plugin-mdx": "^3.1.5"
   }
 }
