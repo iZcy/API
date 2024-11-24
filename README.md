@@ -43,3 +43,36 @@ DB_URI="{Redacted}"
 ```
 npm run dev
 ```
+
+### Accessing Endpoint
+The API will run on ```http://localhost:3500``` by default (or the port specified in the ```.env``` file). Open this URL in your browser or test endpoints using tools like Postman or ```curl```.
+
+## API Endpoints
+1. ```/auth```: Authenticate and access their boards.
+2. ```/board```: Manage top-level project boards.
+3. ```/list```: Organize workflow stages using
+4. ```/card```: Manage tasks.
+5. ```/comment```: Collaborate through task-related comments.
+
+## Project Structure
+```
+KanbanPemWebAPI/
+│  
+├── api/                
+│   ├── controllers/    # Handles API request/response logic
+│   ├── helper/         # Reusable utility functions
+│   ├── logs/           # Stores application logs
+│   ├── middleware/     # Middleware functions for validation and authentication
+│   ├── models/         # Database schema definitions
+│   └── routes/         # Maps API routes to controllers
+│
+└── index.js            # Main entry point for the application
+
+```
+
+## Credits
+1. [Yitzhak](https://github.com/iZcy)
+2. [Ovie](https://github.com/Khairazzz)
+3. [Abe](https://github.com/abeputra)
+4. [Fawwaz](https://github.com/sulaimanfawwazak)
+5. [Rore](https://github.com/potreic)
