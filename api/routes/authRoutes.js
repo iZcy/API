@@ -4,9 +4,12 @@ const authController = require("../controllers/authControllers");
 const accessControl = require("../middleware/accessControl");
 
 router.post("/register", authController.userRegister);
-
 router.use(accessControl.parseTokenDataMiddleware);
-router.post("/login", authController.userLogin);
+
+router.route("/login")
+    .post(authController.userLogin)
+    .get(accessControl.parseTokenDataMiddleware, authController.userLoginWithCookies);
+
 router.get("/logout", authController.userLogout);
 router.get("/role", authController.userRole);
 router.patch("/change-password", authController.userChangePassword);

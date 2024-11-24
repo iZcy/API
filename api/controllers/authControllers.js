@@ -223,6 +223,16 @@ const userLogin = async (req, res) => {
   }
 };
 
+const userLoginWithCookies = async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(400).json({ data: "No user found" });
+  }
+
+  res.status(200).json({ data: user });
+};
+
 const userLogout = async (req, res) => {
   try {
     // Check if cookie exists
@@ -243,7 +253,6 @@ const userRole = async (req, res) => {
         .json({ data: "No token found: Cookies unavailable" });
     }
 
-    // Check if token exists
     const token = req.cookies[cookieName];
     if (!token) {
       return res
@@ -442,6 +451,7 @@ const userUpdate = async (req, res) => {
 module.exports = {
   userRegister,
   userLogin,
+  userLoginWithCookies,
   userLogout,
   userRole,
   userChangePassword,

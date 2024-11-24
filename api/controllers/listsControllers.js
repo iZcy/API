@@ -23,6 +23,11 @@ const listsGet = async (req, res) => {
   try {
     const { boardId } = req.params;
 
+    // Check if boardId is not a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
+    }
+
     // Check if boardId is valid
     const boardExists = await Boards.findById(boardId);
     if (!boardExists) {
