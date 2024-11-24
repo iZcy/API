@@ -71,7 +71,7 @@ KanbanPemWebAPI/
 ```
 
 ## Credits
-1. [Yitzhak](https://github.com/iZcy)
+1. [Yitzhak Edmund Tio Manalu (22/499769/TK/54763)](https://github.com/iZcy)
 2. [Ovie](https://github.com/Khairazzz)
 3. [Abe](https://github.com/abeputra)
 4. [Fawwaz](https://github.com/sulaimanfawwazak)
