@@ -75,4 +75,4 @@ KanbanPemWebAPI/
 2. [Ovie](https://github.com/Khairazzz)
 3. [Abe](https://github.com/abeputra)
 4. [Fawwaz](https://github.com/sulaimanfawwazak)
-5. [Rore](https://github.com/potreic)
+5. [Nibroos Aurore Majiid Haryanto (22/494882/TK/54329)](https://github.com/potreic)
