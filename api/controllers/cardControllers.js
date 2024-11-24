@@ -73,7 +73,6 @@ const cardsGet = async (req, res) => {
 
     // Filter
     const filteredCards = cards.filter((card) => card.listId == listId);
-    console.log(filteredCards);
 
     res.status(200).json({ data: filteredCards });
   } catch (error) {
