@@ -225,6 +225,6 @@ module.exports = {
   commentsPatch,
   commentsDelete,
   deleteAllByCardId,
-  commentsGetById,
+  commnentsGetById,
   commentsGetByCardId
 };
