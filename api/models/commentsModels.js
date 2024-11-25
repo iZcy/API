@@ -4,12 +4,12 @@ const mongoose = require("mongoose");
 const commentsSchema = new mongoose.Schema({
   "cardId": {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Cards", // Reference to Cards collection
+    ref: "Card", // Reference to Cards collection
     required: true
   },
   "userId": {
     type: mongoose.Schema.Types.ObjectId,
-    // ref: "Users", // Reference to Users collection
+    ref: "User", // Reference to Users collection
     required: true
   },
   "content": {
@@ -26,6 +26,6 @@ const commentsSchema = new mongoose.Schema({
   }
 }, { timestamps: true});
 
-const Comments = mongoose.model("Comments", commentsSchema);
+const Comments = mongoose.model("Comment", commentsSchema);
 
 module.exports = Comments;
