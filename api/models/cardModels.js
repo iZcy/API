@@ -13,7 +13,7 @@ const cardSchema = new mongoose.Schema({
   },
   listId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Lists", // Referensi ke Collection Lists
+    ref: "List", // Referensi ke Collection Lists
     required: true // Setiap Card harus terkait dengan List
   },
   assignedTo: [
