@@ -87,23 +87,33 @@ const cardsGet = async (req, res) => {
 // Update a card
 const cardsPatch = async (req, res) => {
   try {
-    const { title, status } = req.body;
+    const { title, status, description, assignedTo } = req.body;
+
+    console.log("Request body:", req.body);
 
     // Check body existence
-    if (!title && !status)
+    if (!title && !status && !description  && !assignedTo)
       return res.status(400).json({
-        error: "At least one field (title or status) is required to update."
+        error: "At least one field (title, status, description or assignedTo) is required to update."
       });
 
     // Check if the card ID is valid
-    if (!title && !status)
+    if (!req.params.id)
       return res.status(400).json({
-        message: "At least one field (title or status) is required to update."
+        message: "Invalid card ID."
       });
+
+    // Validate assignedTo as array of ObjectId
+    if (assignedTo && !Array.isArray(assignedTo)) {
+      console.log("Error: assignedTo should be an array of ObjectIds.");
+      return res.status(400).json({
+        error: "assignedTo should be an array of ObjectIds."
+      });
+    }
 
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
-      { title, status },
+      { title, status, description, assignedTo },
       { new: true }
     );
 
