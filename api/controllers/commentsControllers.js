@@ -15,7 +15,8 @@ const deleteAllByCardId = async (cardId) => {
 
 const commentsGet = async (req, res) => {
   try {
-    const data = await Comments.find();
+    // const data = await Comments.find();
+    const data = await Comments.find().populate("userId", "username").exec();
 
     if (!data) return res.status(404).json({ error: "Comment not found" });
 
@@ -39,7 +40,8 @@ const commnentsGetById = async (req, res) => {
       return res.status(400).json({ data: "id type must be ObjectId" });
 
     // Find the comment by the id
-    const comment = await Comments.findById(id);
+    // const comment = await Comments.findById(id);
+    const comment = await Comments.findById(id).populate("userId", "username");
 
     // If no comment is found, return false
     if (!comment) return res.status(404).json({error: "Comment not found!"});
@@ -55,11 +57,47 @@ const commnentsGetById = async (req, res) => {
   }
 }
 
+const commentsGetByCardId = async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(cardId)) return res.status(400).json({ error: "Invalid cardId! "});
+    // const { content } = req.body;
+    // const { _id: userId } = req.user;
+
+    // Ensure the card ID is valid
+    const card = await Card.findById(cardId);
+    if (!card) return res.status(400).json({ data: "ID is not a valid Card ID." });
+
+    // Fetch all comments for the specific card
+    // const comments = await Comments.find();
+    const comments = await Comments.find( {cardId })
+      .populate("userId", "username")
+      .sort({ createdAt: -1 });
+
+    // const filteredComments = comments.filter((comment) => comment.cardId == cardId);
+    // console.log(filteredComments);
+
+    // console.log(_id);
+
+    // res.status(200).json({ data: filteredComments });
+    res.status(200).json({ data: comments });
+  } catch (error) {
+    console.error("Error retrieving comments: ", error);
+    res.status(500).json({
+      data: "Failed to retrieve comments due to server error",
+      details: error.message
+    });
+  }
+}
+
 const commentsPost = async (req, res) => {
   try {
     // Body parsing
     // const { cardId, userId, content, isEdited } = req.body;
-    const { cardId, userId, content } = req.body;
+    // const { cardId, userId, content } = req.body;
+    const { cardId } = req.params;
+    const { content } = req.body;
+    const { _id: userId } = req.user;
     // const { userId, content } = req.body;
 
     // Check body existance
@@ -187,7 +225,6 @@ module.exports = {
   commentsPatch,
   commentsDelete,
   deleteAllByCardId,
-  commnentsGetById
+  commentsGetById,
+  commentsGetByCardId
 };
-
-// Add dthis commentgit
