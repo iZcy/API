@@ -18,7 +18,7 @@ router.use(accessControl.parseTokenDataMiddleware);
 router.get("/logout", authController.userLogout);
 router.get("/role", authController.userRole);
 router.patch("/change-password", authController.userChangePassword);
-router.delete("/delete", authController.userDelete);
-router.patch("/update", authController.userUpdate);
+router.delete("/delete/:userId", authController.userDelete);
+router.patch("/update/:userId", authController.userUpdate);
 
 module.exports = router;

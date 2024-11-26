@@ -58,9 +58,7 @@ const nonAdminConstraint = async (
 const userRegister = async (req, res) => {
   try {
     // Body parsing
-    const { username, email, password, role: clientRole } = req.body;
-
-    const role = clientRole === "user" ? "member" : clientRole;
+    const { username, email, password, role } = req.body;
 
     // Check Body Existence
     if (!username)
@@ -343,7 +341,7 @@ const userChangePassword = async (req, res) => {
 const userDelete = async (req, res) => {
   try {
     // Body parsing
-    const { email, password } = req.body;
+    const { userId } = req.params;
     const userData = req.user;
 
     // if userData is not found, return 403
@@ -351,25 +349,32 @@ const userDelete = async (req, res) => {
       return res.status(403).json({ data: "Forbidden to delete!" });
     }
 
-    // Check Body Existence
-    if (!email) return res.status(400).json({ data: "Email is required" });
-
     // Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(400).json({ data: "User does not exist" });
     }
 
     // If the to delete user is an admin, only himself can delete by providing the password
-    const resp = await nonAdminConstraint(userData, user, email, password);
-    if (resp) return resp;
+    if (
+      user.role === "admin" &&
+      user._id.toString() !== userData._id.toString()
+    ) {
+      return res.status(400).json({ data: "This account is not yours" });
+    }
 
-    await User.deleteOne({ email });
     // Logout if the user is deleting himself
-    if (userData.email === email) {
+    if (user._id.toString() === userData._id.toString()) {
       res.clearCookie(cookieName, cookiesOptionsGen());
     }
 
+    // Delete user
+    const deletedUser = await User.findByIdAndDelete(userId);
+    if (!deletedUser) {
+      return res.status(400).json({ data: "Error deleting user" });
+    }
+
+    // Send success response
     res.status(200).json({ data: "User deleted" });
   } catch (error) {
     console.log(error);
@@ -380,13 +385,21 @@ const userDelete = async (req, res) => {
 const userUpdate = async (req, res) => {
   try {
     // Body parsing
+    const { userId } = req.params;
     const { email, password, username, role } = req.body;
+    const executor = req.user;
 
     // Check Body Existence
-    if (!email) return res.status(400).json({ data: "Email is required" });
+    if (!userId) return res.status(400).json({ data: "UserId is required" });
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ data: "User does not exist" });
+    }
 
     // Check if there exist at least one field to update
-    if (!username && !role) {
+    if (!email && !username && !role && !password) {
       return res.status(400).json({ data: "No field to update" });
     }
 
@@ -399,25 +412,41 @@ const userUpdate = async (req, res) => {
       return res.status(400).json({ data: "Unknown field to update" });
     }
 
-    // Check Body Validity
-    const emailTooShort = email.length < 6;
-    const emailWrongType = typeof email !== "string";
-    if (emailWrongType) {
-      return res.status(400).json({ data: "Invalid email: Wrong Type" });
-    }
-    if (emailTooShort) {
-      return res.status(400).json({ data: "Invalid email: Too Short" });
+    if (executor.role !== "admin") {
+      // If the to delete user is an admin, only himself can delete by providing the password
+      if (
+        user.role === "admin" &&
+        user._id.toString() !== executor._id.toString()
+      ) {
+        return res
+          .status(400)
+          .json({ data: "This admin account is not yours" });
+      }
+    } else {
+      // If the user is not an admin, he can only update himself
+      if (executor._id.toString() !== user._id.toString()) {
+        return res.status(400).json({ data: "This user account is not yours" });
+      }
     }
 
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ data: "User does not exist" });
-    }
+    if (email) {
+      // Check Body Validity
+      const emailTooShort = email.length < 6;
+      const emailWrongType = typeof email !== "string";
+      const emailIsUsed =
+        (await User.find({ email }).countDocuments()) > 0 &&
+        email !== user.email;
 
-    // If the to delete user is an admin, only himself can delete by providing the password
-    const resp = await nonAdminConstraint(userData, user, email, password);
-    if (resp) return resp;
+      if (emailWrongType) {
+        return res.status(400).json({ data: "Invalid email: Wrong Type" });
+      }
+      if (emailTooShort) {
+        return res.status(400).json({ data: "Invalid email: Too Short" });
+      }
+      if (emailIsUsed) {
+        return res.status(400).json({ data: "Email is already used" });
+      }
+    }
 
     if (username) {
       const usernameTooShort = username.length < 6;
@@ -428,7 +457,6 @@ const userUpdate = async (req, res) => {
       if (usernameTooShort) {
         return res.status(400).json({ data: "Invalid username: Too Short" });
       }
-      await User.updateOne({ email }, { username });
     }
 
     if (role) {
@@ -440,8 +468,45 @@ const userUpdate = async (req, res) => {
       if (roleNotInEnum) {
         return res.status(400).json({ data: "Invalid role: Invalid Variant" });
       }
-      await User.updateOne({ email }, { role });
+
+      // If the current user is not an admin, he can't change the role and if the current user is an admin, he can't change the role of another admin
+      if (
+        (executor.role !== "admin" &&
+          user._id.toString() !== executor._id.toString() &&
+          role === "admin") ||
+        (executor.role === "admin" &&
+          user.role === "admin" &&
+          user._id.toString() !== executor._id.toString())
+      ) {
+        return res.status(400).json({ data: "Invalid role: Forbidden" });
+      }
     }
+
+    let passwordHash = null;
+    if (password) {
+      const passwordTooShort = password.length < 6;
+      const passwordWrongType = typeof password !== "string";
+      if (passwordWrongType) {
+        return res.status(400).json({ data: "Invalid password: Wrong Type" });
+      }
+      if (passwordTooShort) {
+        return res.status(400).json({ data: "Invalid password: Too Short" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      passwordHash = await bcrypt.hash(password, salt);
+    }
+
+    // Execute update
+    await User.updateOne(
+      { _id: userId },
+      {
+        username: username || user.username,
+        email: email || user.email,
+        role: role || user.role,
+        passwordHash: passwordHash || user.passwordHash
+      }
+    );
 
     res.status(200).json({ data: "User updated" });
   } catch (error) {
