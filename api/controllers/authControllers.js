@@ -58,7 +58,9 @@ const nonAdminConstraint = async (
 const userRegister = async (req, res) => {
   try {
     // Body parsing
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role: clientRole } = req.body;
+
+    const role = clientRole === "user" ? "member" : clientRole;
 
     // Check Body Existence
     if (!username)
@@ -113,7 +115,7 @@ const userRegister = async (req, res) => {
     // guest can regiester themselves (without credentials)
     // member is a promoted guest, yet can't register themselves and can't promote others
 
-    if (role !== "guest") {
+    if (role === "admin") {
       const response = await accessControl.allowedRole("admin")(
         req,
         res,

@@ -33,7 +33,7 @@ const commnentsGetById = async (req, res) => {
     const { id } = req.params;
 
     // Check body existance
-    if (!id) return res.status(400).json({ error: "id is required!" });
+    if (!id) return res.status(400).json({ error: "Comment id is required!" });
 
     // Check id data type
     if (!mongoose.Types.ObjectId.isValid(id))
@@ -70,7 +70,7 @@ const commentsGetByCardId = async (req, res) => {
 
     // Fetch all comments for the specific card
     // const comments = await Comments.find();
-    const comments = await Comments.find( {cardId })
+    const comments = await Comments.find( { cardId })
       .populate("userId", "username")
       .sort({ createdAt: -1 });
 
@@ -149,7 +149,7 @@ const commentsPatch = async (req, res) => {
     const data = await Comments.findById(id);
 
     // Check body existance
-    if (!id) res.status(400).json({ error: "id is required!" });
+    if (!id) res.status(400).json({ error: "commentsId is required!" });
     if (!cardId) res.status(400).json({ error: "cardId is required!" });
     if (!userId) res.status(400).json({ error: "userId is required!" });
     if (!content) res.status(400).json({ error: "content is required!" });
@@ -197,17 +197,19 @@ const commentsPatch = async (req, res) => {
 const commentsDelete = async (req, res) => {
   try {
     // Body parsing
-    const { id } = req.body;
-    const result = await Comments.findByIdAndDelete(id);
+    // const { id } = req.body;
+    const { id } = req.params;
 
     // Check bddy existance
-    if (!id) return res.status(404).json({ error: "id is required!" });
+    if (!id) return res.status(404).json({ error: "commentId (del) is required!" });
     if (!mongoose.Types.ObjectId.isValid(id))
       return res.status(400).json({ data: "id type must be ObjectId" });
-
+    
     // Check if id exists
-    const id_check = await Comments.findOne({ id });
-    if (!id_check) return res.status(400).json({ error: "id doesn't exist!" });
+    // const id_check = await Comments.findOne({ id });
+    // if (!id_check) return res.status(400).json({ error: "id doesn't exist!" });
+
+    const result = await Comments.findByIdAndDelete(id);
 
     // Check if result is returned
     if (!result) return res.status(404).json({ error: "Comment not found" });

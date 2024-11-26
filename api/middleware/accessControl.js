@@ -7,10 +7,9 @@ const cookieName = process.env.COOKIE_NAME;
 
 const parseTokenData = async (req, res) => {
   const token = req.cookies[cookieName];
-  
+
   if (!token) {
-    req.user = { role: enums.roleEnum[0] }; // Assign default role
-    return null;
+    return res.status(403).json({ message: "Unauthorized!" });
   }
 
   try {

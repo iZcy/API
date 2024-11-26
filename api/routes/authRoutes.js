@@ -4,11 +4,16 @@ const authController = require("../controllers/authControllers");
 const accessControl = require("../middleware/accessControl");
 
 router.post("/register", authController.userRegister);
-router.use(accessControl.parseTokenDataMiddleware);
 
-router.route("/login")
-    .post(authController.userLogin)
-    .get(accessControl.parseTokenDataMiddleware, authController.userLoginWithCookies);
+router
+  .route("/login")
+  .post(authController.userLogin)
+  .get(
+    accessControl.parseTokenDataMiddleware,
+    authController.userLoginWithCookies
+  );
+
+router.use(accessControl.parseTokenDataMiddleware);
 
 router.get("/logout", authController.userLogout);
 router.get("/role", authController.userRole);
