@@ -26,7 +26,7 @@ const parseTokenData = async (req, res) => {
 
     // Attach the user data to the request
     req.user = userData;
-    return res.status(200).json({ message: "Token is valid", data: req.user });
+    return null;
   } catch (err) {
     console.error("Error parsing token data:", err);
     // clear the cookie
