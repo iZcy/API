@@ -61,9 +61,9 @@ const cardsPost = async (req, res) => {
     const savedCard = await newCard.save();
 
     // Synchronize collaborators with the list
-    const uniqueCollaborators = new Set([...list.assignedTo, ...assignedTo]);
-    list.assignedTo = Array.from(uniqueCollaborators); // Ensure no duplicates
-    await list.save();
+    // const uniqueCollaborators = new Set([...list.assignedTo, ...assignedTo]);
+    // list.assignedTo = Array.from(uniqueCollaborators); // Ensure no duplicates
+    // await list.save();
 
     res.status(201).json(savedCard);
   } catch (error) {
@@ -121,14 +121,14 @@ const cardsGet = async (req, res) => {
 // Update a card
 const cardsPatch = async (req, res) => {
   try {
-    const { title, status, description, assignedTo } = req.body;
+    const { title, status, description, assignedTo, dueDate } = req.body;
 
     console.log("Request body:", req.body);
 
     // Check body existence
-    if (!title && !status && !description  && !assignedTo)
+    if (!title && !status && !description  && !assignedTo && !dueDate)
       return res.status(400).json({
-        error: "At least one field (title, status, description or assignedTo) is required to update."
+        error: "At least one field (title, status, description, assignedTo or dueDate) is required to update."
       });
 
     // Check if the card ID is valid
@@ -137,21 +137,40 @@ const cardsPatch = async (req, res) => {
         message: "Invalid card ID."
       });
 
-    // Validate assignedTo as array of ObjectId
-    if (assignedTo && !Array.isArray(assignedTo)) {
-      console.log("Error: assignedTo should be an array of ObjectIds.");
-      return res.status(400).json({
-        error: "assignedTo should be an array of ObjectIds."
-      });
-    }
-
-    // Validate each user ID in assignedTo
-    if (assignedTo) {
-      const validUsers = await User.find({ '_id': { $in: assignedTo } });
-      if (validUsers.length !== assignedTo.length) {
-        return res.status(400).json({ error: "Some assigned users are invalid." });
+      if (dueDate && isNaN(Date.parse(dueDate))) {
+        return res.status(400).json({
+          error: "Invalid dueDate format. Expected a valid date string."
+        });
       }
+      
+
+    // Validate assignedTo as array of ObjectId
+    // if (assignedTo && !Array.isArray(assignedTo)) {
+    //   console.log("Error: assignedTo should be an array of ObjectIds.");
+    //   return res.status(400).json({
+    //     error: "assignedTo should be an array of ObjectIds."
+    //   });
+    // }
+
+    // // Validate each user ID in assignedTo
+    // if (assignedTo) {
+    //   const validUsers = await User.find({ '_id': { $in: assignedTo } });
+    //   if (validUsers.length !== assignedTo.length) {
+    //     return res.status(400).json({ error: "Some assigned users are invalid." });
+    //   }
+    // }
+
+    if (!Array.isArray(assignedTo)) {
+      console.log("assignedTo is not an array");
+      return res.status(400).json({ error: "Assigned To must be an array" });
     }
+    
+    const validUsers = await User.find({ '_id': { $in: assignedTo } });
+    if (validUsers.length !== assignedTo.length) {
+      console.log("Some users are invalid:", assignedTo);
+      return res.status(400).json({ error: "Some assigned users are invalid." });
+    }
+    
 
     const card = await Card.findById(req.params.id);
     if (!card) {
@@ -234,9 +253,13 @@ const cardsAddCollaborator = async (req, res) => {
       return res.status(500).json({ data: "Collaborator addition fails." });
 
     // Synchronize collaborator to the list
-    const list = await List.findById(card.listId);
-    if (!list)
-      return res.status(400).json({ data: "List not found for the card." });
+    // const list = await List.findById(card.listId);
+    // if (!list){
+    //   console.log("List not found with ID:", listId);
+    //   return res.status(400).json({ data: "List not found for the card." });
+    // }
+      
+    
 
     // Add the user to the list if not already present
     if (!list.assignedTo.includes(user._id)) {
