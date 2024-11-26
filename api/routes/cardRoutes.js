@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const cardControllers = require("../controllers/cardControllers");
 
+router.put('/update-title', listsControllers.updateListTitle);
+
 router
   .get("/:listId", cardControllers.cardsGet) // Menggunakan cardsGet untuk mendapatkan semua kartu
   .get("/card/:cardId", cardControllers.cardsGet)

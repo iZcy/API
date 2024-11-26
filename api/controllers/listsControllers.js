@@ -151,6 +151,31 @@ const listsDelete = async (req, res) => {
   }
 };
 
+exports.updateListTitle = async (req, res) => {
+  try {
+    const { listId, title } = req.body;
+
+    if (!listId || !title) {
+      return res.status(400).json({ message: "List ID and title are required" });
+    }
+
+    const updatedList = await List.findByIdAndUpdate(
+      listId,
+      { title },
+      { new: true } // Mengembalikan data yang diperbarui
+    );
+
+    if (!updatedList) {
+      return res.status(404).json({ message: "List not found" });
+    }
+
+    res.status(200).json({ message: "Title updated successfully", list: updatedList });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   listsGet,
   listsPost,
