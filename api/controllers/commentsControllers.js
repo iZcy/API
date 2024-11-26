@@ -72,7 +72,8 @@ const commentsGetByCardId = async (req, res) => {
     // const comments = await Comments.find();
     const comments = await Comments.find( { cardId })
       .populate("userId", "username")
-      .sort({ createdAt: -1 });
+      // .sort({ createdAt: -1 });  // Sorts the comments from the newest
+      .sort({ createdAt: 1 }); // Sorts the comments from the oldest
 
     // const filteredComments = comments.filter((comment) => comment.cardId == cardId);
     // console.log(filteredComments);
@@ -140,57 +141,92 @@ const commentsPost = async (req, res) => {
   }
 };
 
+// const commentsPatch = async (req, res) => {
+//   try {
+//     // Body parsing
+//     // const { id, content } = req.body;
+//     // const { id, cardId, userId, content, isEdited } = req.body;
+//     const { id, cardId, userId, content } = req.body;
+//     const data = await Comments.findById(id);
+
+//     // Check body existance
+//     if (!id) res.status(400).json({ error: "commentsId is required!" });
+//     if (!cardId) res.status(400).json({ error: "cardId is required!" });
+//     if (!userId) res.status(400).json({ error: "userId is required!" });
+//     if (!content) res.status(400).json({ error: "content is required!" });
+
+//     // Check the data types
+//     if (!mongoose.Types.ObjectId.isValid(id))
+//       return res.status(400).json({ data: "id type must be ObjectId" });
+//     if (!mongoose.Types.ObjectId.isValid(cardId))
+//       return res.status(400).json({ data: "cardId type must be ObjectId" });
+//     if (!mongoose.Types.ObjectId.isValid(userId))
+//       return res.status(400).json({ data: "userId type must be ObjectId" });
+//     if (typeof content !== "string")
+//       return res.status(400).json({ data: "content type must be string" });
+
+//     // Check if id exists
+//     const id_check = await Comments.findOne({ id });
+//     if (!id_check) return res.status(400).json({ error: "id doesn't exist!" });
+
+//     // Check if cardId exists
+//     const card_check = await Card.findOne({ _id: cardId });
+//     if (!card_check)
+//       return res.status(400).json({ error: "cardId doesn't exist!" });
+
+//     // Check if userId exists
+//     const user_check = await User.findOne({ _id: userdId });
+//     if (!user_check)
+//       return res.status(400).json({ error: "userId doesn't exist!" });
+
+//     // Check if data is returned
+//     if (!data) return res.status(404).json({ error: "Comments not found" });
+
+//     data.cardId = cardId;
+//     data.userId = userId;
+//     data.content = content;
+//     data.isEdited = true;
+
+//     await data.save();
+//     res.status(200).json({ message: "Comment updated", data: data });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Error updating comments" });
+//   }
+// };
+
 const commentsPatch = async (req, res) => {
   try {
-    // Body parsing
-    // const { id, content } = req.body;
-    // const { id, cardId, userId, content, isEdited } = req.body;
-    const { id, cardId, userId, content } = req.body;
-    const data = await Comments.findById(id);
+    // Extract the necessary data
+    const { id: commentId } = req.params; // Comment ID from the URL
+    const { content } = req.body; // New content from the request body
+    const { _id: userId } = req.user; // User ID from the token middleware
 
-    // Check body existance
-    if (!id) res.status(400).json({ error: "commentsId is required!" });
-    if (!cardId) res.status(400).json({ error: "cardId is required!" });
-    if (!userId) res.status(400).json({ error: "userId is required!" });
-    if (!content) res.status(400).json({ error: "content is required!" });
+    // Validate input
+    if (!commentId) return res.status(400).json({ error: "commentId is required!" });
+    if (!content) return res.status(400).json({ error: "content is required!" });
 
-    // Check the data types
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res.status(400).json({ data: "id type must be ObjectId" });
-    if (!mongoose.Types.ObjectId.isValid(cardId))
-      return res.status(400).json({ data: "cardId type must be ObjectId" });
-    if (!mongoose.Types.ObjectId.isValid(userId))
-      return res.status(400).json({ data: "userId type must be ObjectId" });
-    if (typeof content !== "string")
-      return res.status(400).json({ data: "content type must be string" });
+    if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(400).json({ error: "commentId must be a valid ObjectId" });
 
-    // Check if id exists
-    const id_check = await Comments.findOne({ id });
-    if (!id_check) return res.status(400).json({ error: "id doesn't exist!" });
+    if (typeof content !== "string") return res.status(400).json({ error: "content type must be string" });
 
-    // Check if cardId exists
-    const card_check = await Card.findOne({ _id: cardId });
-    if (!card_check)
-      return res.status(400).json({ error: "cardId doesn't exist!" });
+    // Find the comment in the database
+    const comment = await Comments.findById(commentId);
 
-    // Check if userId exists
-    const user_check = await User.findOne({ _id: userdId });
-    if (!user_check)
-      return res.status(400).json({ error: "userId doesn't exist!" });
+    if (!comment) return res.status(404).json({ error: "Comment not found" });
 
-    // Check if data is returned
-    if (!data) return res.status(404).json({ error: "Comments not found" });
+    // Check ownership (only the original user can edit their comment)
+    if (comment.userId.toString() !== userId.toString()) return res.status(403).json({ error: "Unauthorized to edit this comment" });
 
-    data.cardId = cardId;
-    data.userId = userId;
-    data.content = content;
-    data.isEdited = true;
+    // Update the content
+    comment.content = content;
+    comment.isEdited = true; // Mark it as edited
+    await comment.save();
 
-    await data.save();
-    res.status(200).json({ message: "Comment updated", data: data });
+    res.status(200).json({ message: "Comment updated", data: comment });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Error updating comments" });
+    console.error(error);
+    res.status(500).json({ error: "Error updating comment" });
   }
 };
 
