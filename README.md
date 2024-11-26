@@ -83,17 +83,17 @@ KanbanPemWebAPI/
 ### 📺 Official Project Video
 <!--
 [Watch our comprehensive project demonstration on YouTube](https://www.youtube.com/embed/your-video-id)
--->
-<iframe width="560" height="315" src="https://www.youtube.com/embed/your-video-id" frameborder="0" allowfullscreen></iframe>
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/your-video-id" frameborder="0" allowfullscreen></iframe>
+-->
 ## 🤝 Meet the Innovators
 
 ### Core Development Team
 1. 👨‍💻 [Yitzhak Edmund Tio Manalu](https://github.com/iZcy)
 2. 👩‍💻 [Ovie Khaira Zayyan](https://github.com/Khairazzz)
-3. 💻 [Abe](https://github.com/abeputra)
-4. 🖥️ [Sulaiman Fawwaz Abdillah Karim](https://github.com/sulaimanfawwazak)
-5. 🌐 [Nibroos Aurore Majiid Haryanto](https://github.com/potreic)
+3. 👨‍💻 [Abe](https://github.com/abeputra)
+4. 👨‍💻 [Sulaiman Fawwaz Abdillah Karim](https://github.com/sulaimanfawwazak)
+5. 👩‍💻 [Nibroos Aurore Majiid Haryanto](https://github.com/potreic)
 
 ## 🆘 Support
 For questions, issues, or collaboration, please [open an issue](https://github.com/iZcy/KanbanPemWebAPI/issues) or contact the maintainers.
