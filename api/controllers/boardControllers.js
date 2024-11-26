@@ -29,6 +29,7 @@ const deleteListsMiddleware = async (req, res, next) => {
 const boardGet = async (req, res) => {
   try {
     const userId = req.user._id;
+    
     const boards = await Board.find({ userId }).populate("userId", "username");
 
     const data = boards.map((board) => ({
