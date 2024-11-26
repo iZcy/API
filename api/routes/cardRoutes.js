@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const cardControllers = require("../controllers/cardControllers");
+const accessControl = require("../middleware/accessControl");
+
+router.use(accessControl.parseTokenDataMiddleware);
 
 router
   .get("/:listId", cardControllers.cardsGet) // Menggunakan cardsGet untuk mendapatkan semua kartu

@@ -1,18 +1,35 @@
 const mongoose = require("mongoose");
 const Lists = require("../models/listsModels");
 const Boards = require("../models/boardModels");
-const { deleteAllByListId } = require("./cardControllers");
+const { deleteAllByListId, retrieveCardsByUser } = require("./cardControllers");
 
 const deleteAllByBoardId = async (boardId) => {
   try {
     // Find all list with the boardId
-    const data = await List.find({ boardId });
+    const data = await Lists.find({ boardId });
     // map all the listId and kill all card
     data.map((list) => deleteAllByListId(list._id));
     // kill all list
-    await List.deleteMany({ boardId });
+    await Lists.deleteMany({ boardId });
 
     return true;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+const retrieveListsByUser = async (userIdToFind) => {
+  try {
+    const accessibleCards = await retrieveCardsByUser(userIdToFind);
+
+    // Extract the unique boardIds from the cards
+    const listIds = [...new Set(accessibleCards.map((card) => card.listId))];
+
+    // Find the boards
+    const data = await Lists.find({ _id: { $in: listIds } });
+
+    return data;
   } catch (error) {
     console.log(error);
     return null;
@@ -25,7 +42,9 @@ const listsGet = async (req, res) => {
 
     // Check if boardId is not a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(boardId)) {
-      return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
+      return res
+        .status(400)
+        .json({ data: "Invalid boardId: Must be a valid ObjectId" });
     }
 
     // Check if boardId is valid
@@ -37,9 +56,21 @@ const listsGet = async (req, res) => {
     // Find lists where boardId matches the provided boardId
     let data = await Lists.find({ boardId }).populate("boardId");
 
-    data = data.filter(
-      (list) => list.boardId && list.boardId._id.toString() === boardId
-    );
+    // Is the user the owner of the board?
+    if (req.user._id.toString() === boardExists.userId.toString()) {
+      data = data.filter(
+        (list) => list.boardId && list.boardId._id.toString() === boardId
+      );
+    } else {
+      // get accessible lists by userId
+      const accessibleLists = await retrieveListsByUser(req.user._id);
+
+      // Filter the lists that has the same boardId as the boardId
+      data = accessibleLists.filter(
+        (list) => list.boardId && list.boardId._id.toString() === boardId
+      );
+    }
+
     res.status(200).json({ data });
   } catch (error) {
     console.error("Error getting Lists: ", error); // More detailed error log
@@ -117,7 +148,6 @@ const listsPatch = async (req, res) => {
   }
 };
 
-
 const listsDelete = async (req, res) => {
   try {
     const listId = req.params.id;
@@ -130,6 +160,7 @@ const listsDelete = async (req, res) => {
     if (!list)
       return res.status(400).json({ data: "ID is not a valid List ID." });
 
+    await deleteAllByListId(listId);
     const deletedList = await Lists.findByIdAndDelete(req.params.id);
     if (!deletedList)
       return res.status(404).json({ message: "List not found" });
@@ -145,5 +176,6 @@ module.exports = {
   listsPost,
   listsPatch,
   listsDelete,
-  deleteAllByBoardId
+  deleteAllByBoardId,
+  retrieveListsByUser
 };

@@ -1,43 +1,51 @@
 const mongoose = require("mongoose");
 const User = require("../models/userModels");
 const Board = require("../models/boardModels");
-const Lists = require("../models/listsModels");
 const enums = require("../helper/enumerations");
 const listController = require("../controllers/listsControllers");
 
-const deleteListsMiddleware = async (req, res, next) => {
+const retrieveBoardsByUser = async (userIdToFind) => {
   try {
-    const { id } = req.body;
+    const accessibleLists = await listController.retrieveListsByUser(
+      userIdToFind
+    );
 
-    const board = await Board.findById(id);
-    if (!board) {
-      return res.status(404).json({ message: "Board not found" });
-    }
+    // Extract the unique boardIds from the lists
+    const boardIds = [...new Set(accessibleLists.map((list) => list.boardId))];
+    // Find the boards
+    const data = await Board.find({ _id: { $in: boardIds } }).populate(
+      "userId",
+      "username"
+    );
 
-    await Lists.deleteMany({ boardId: id });
-
-    next();
+    return data;
   } catch (error) {
-    console.error("Error deleting lists related to the board:", error);
-    res
-      .status(500)
-      .json({ message: "Error deleting lists related to the board" });
+    console.log(error);
+    return null;
   }
 };
-
 
 const boardGet = async (req, res) => {
   try {
     const userId = req.user._id;
-    
+
     const boards = await Board.find({ userId }).populate("userId", "username");
 
-    const data = boards.map((board) => ({
+    // Look for boards that are public or shared with the user
+    const publicBoards = await Board.find({
+      visibility: "public"
+    }).populate("userId", "username");
+
+    const sharedBoards = await retrieveBoardsByUser(userId);
+
+    const allBoards = [...boards, ...publicBoards, ...sharedBoards];
+
+    const data = allBoards.map((board) => ({
       _id: board._id,
       title: board.title,
       createdBy: board.userId.username,
       description: board.description,
-      visibility: board.visibility,
+      visibility: board.visibility
     }));
 
     res.status(200).json({ message: "Boards retrieved", data });
@@ -82,7 +90,7 @@ const boardPost = async (req, res) => {
       userId,
       description,
       //createdBy: userExists.username,
-      visibility,
+      visibility
     });
 
     await newBoard.save();
@@ -92,8 +100,8 @@ const boardPost = async (req, res) => {
         title: newBoard.title,
         description: newBoard.description,
         visibility: newBoard.visibility,
-        createdBy: userExists.username,
-      },
+        createdBy: userExists.username
+      }
     });
   } catch (error) {
     console.error("Error saving board:", error);
@@ -141,7 +149,7 @@ const boardPatch = async (req, res) => {
         description: board.description,
         visibility: board.visibility,
         createdBy: board.userId.username
-      } 
+      }
     });
   } catch (error) {
     console.error("Error updating board:", error);
@@ -166,10 +174,12 @@ const boardDelete = async (req, res) => {
 
     // Check authorization
     if (!board.userId.equals(req.user._id)) {
-      return res.status(403).json({ message: "Forbidden: You do not own this board" });
+      return res
+        .status(403)
+        .json({ message: "Forbidden: You do not own this board" });
     }
 
-    listController.deleteAllByBoardId(id);
+    await listController.deleteAllByBoardId(id);
     // Delete the board itself
     await Board.findByIdAndDelete(id);
 
@@ -195,6 +205,5 @@ module.exports = {
   boardPost,
   boardGet,
   boardPatch,
-  boardDelete,
-  deleteListsMiddleware,
+  boardDelete
 };

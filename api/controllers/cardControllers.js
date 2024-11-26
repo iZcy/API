@@ -1,16 +1,28 @@
+const Board = require("../models/boardModels");
 const Card = require("../models/cardModels");
 const List = require("../models/listsModels");
 const User = require("../models/userModels");
 const { deleteAllByCardId } = require("./commentsControllers");
-const express = require("express");
-const router = express.Router();
+
+const retrieveCardsByUser = async (userIdToFind) => {
+  try {
+    const cards = await Card.find({
+      assignedTo: { $in: [userIdToFind] }
+    }).populate("assignedTo", "username name email");
+
+    return cards;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
 
 const deleteAllByListId = async (listId) => {
   try {
     // Find all card with the listId
     const data = await Card.find({ listId });
     // map all the cardId and kill all comment
-    data.map((card) => commentController.deleteAllByCardId(card._id));
+    data.map((card) => deleteAllByCardId(card._id));
     // kill all card
     await Card.deleteMany({ listId });
 
@@ -110,8 +122,30 @@ const cardsGet = async (req, res) => {
       .populate("assignedTo", "username name email")
       .exec(); // Populate users
 
-    // Filter
-    const filteredCards = cards.filter((card) => card.listId == listId);
+    let filteredCards;
+
+    // Card belongs to what list:
+    const belongList = await List.findById(listId);
+
+    // List belongs to what board:
+    const belongBoard = await Board.findById(belongList.boardId);
+
+    // Owner id of belongBoard
+    const ownerBoard = belongBoard.userId.toString();
+
+    // Is the user the owner of the board?
+    if (req.user._id.toString() === ownerBoard) {
+      // Filter
+      filteredCards = cards.filter((card) => card.listId == listId);
+    } else {
+      // Fetch accessible cards by userId
+      const accessibleCards = await retrieveCardsByUser(req.user._id);
+
+      // Filter the lists that has the same boardId as the boardId
+      filteredCards = accessibleCards.filter(
+        (card) => card.listId && card.listId._id.toString() === listId
+      );
+    }
 
     res.status(200).json({ data: filteredCards });
   } catch (error) {
@@ -204,6 +238,7 @@ const cardsDelete = async (req, res) => {
     if (!card)
       return res.status(400).json({ data: "ID is not a valid Card ID." });
 
+    await deleteAllByCardId(cardId);
     const deletedCard = await Card.findByIdAndDelete(req.params.id);
     if (!deletedCard)
       return res.status(404).json({ message: "Card not found" });
@@ -318,5 +353,6 @@ module.exports = {
   cardsDelete,
   getCardById,
   cardsAddCollaborator,
-  cardsRemoveCollaborator
+  cardsRemoveCollaborator,
+  retrieveCardsByUser
 };
