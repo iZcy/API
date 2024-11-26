@@ -78,14 +78,6 @@ KanbanPemWebAPI/
 └── index.js            # 🚪 Application entry point
 ```
 
-## 🎥 Project Walkthrough
-
-### 📺 Official Project Video
-<!--
-[Watch our comprehensive project demonstration on YouTube](https://www.youtube.com/embed/your-video-id)
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/your-video-id" frameborder="0" allowfullscreen></iframe>
--->
 ## 🤝 Meet the Innovators
 
 ### Core Development Team
@@ -100,3 +92,6 @@ For questions, issues, or collaboration, please [open an issue](https://github.c
 
 ## 🌟 Wanna See the Sunny Part?
 Here's our [interface code](https://github.com/iZcy/KanbanPemWebInterface)
+
+## 🎥 Project Video
+[Watch our presentation and explanation](https://drive.google.com/drive/folders/1OH5PfHBzO9_7NqgYZbYJSbeO8D3T9Fs4?usp=sharing)
