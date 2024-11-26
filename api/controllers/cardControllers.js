@@ -149,51 +149,37 @@ const cardsPatch = async (req, res) => {
       });
     }
 
-    // Validate assignedTo as array of ObjectId
-    // if (assignedTo && !Array.isArray(assignedTo)) {
-    //   console.log("Error: assignedTo should be an array of ObjectIds.");
-    //   return res.status(400).json({
-    //     error: "assignedTo should be an array of ObjectIds."
-    //   });
-    // }
-
-    // // Validate each user ID in assignedTo
-    // if (assignedTo) {
-    //   const validUsers = await User.find({ '_id': { $in: assignedTo } });
-    //   if (validUsers.length !== assignedTo.length) {
-    //     return res.status(400).json({ error: "Some assigned users are invalid." });
-    //   }
-    // }
-
-    if (!Array.isArray(assignedTo)) {
-      console.log("assignedTo is not an array");
-      return res.status(400).json({ error: "Assigned To must be an array" });
-    }
-
-    const validUsers = await User.find({ _id: { $in: assignedTo } });
-    if (validUsers.length !== assignedTo.length) {
-      console.log("Some users are invalid:", assignedTo);
-      return res
-        .status(400)
-        .json({ error: "Some assigned users are invalid." });
-    }
-
     const card = await Card.findById(req.params.id);
     if (!card) {
       return res.status(404).json({ data: "Card not found" });
     }
 
-    // Update assignedTo if provided, or maintain existing values
     let updatedAssignedTo = card.assignedTo;
 
     if (assignedTo) {
       // If assignedTo is provided, we'll replace the existing values
+      if (!Array.isArray(assignedTo)) {
+        return res.status(400).json({ error: "Assigned To must be an array" });
+      }
+      const validUsers = await User.find({ _id: { $in: assignedTo } });
+      if (validUsers.length !== assignedTo.length) {
+        return res
+          .status(400)
+          .json({ error: "Some assigned users are invalid." });
+      }
       updatedAssignedTo = assignedTo;
     }
 
+    // Update only the fields that are provided
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
-      { title, status, description, assignedTo },
+      {
+        title,
+        status,
+        description,
+        assignedTo: updatedAssignedTo,  // Use updated assignedTo
+        dueDate, // Update dueDate if provided
+      },
       { new: true }
     );
 
