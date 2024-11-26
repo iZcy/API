@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const cardControllers = require("../controllers/cardControllers");
+const listsControllers = require("../controllers/listsControllers");
 
 router.put('/update-title', listsControllers.updateListTitle);
 
