@@ -275,6 +275,54 @@ const cardsAddCollaborator = async (req, res) => {
   }
 };
 
+const cardsRemoveCollaborator = async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const { userId } = req.body;
+
+    // Check if the card ID & user ID is provided
+    if (!cardId) return res.status(400).json({ error: "Card ID is required." });
+    if (!userId) return res.status(400).json({ error: "User ID is required." });
+
+    // Check if the card ID is valid
+    const card = await Card.findById(cardId);
+    if (!card)
+      return res.status(400).json({ data: "ID is not a valid Card ID." });
+
+    // Check if the user ID is valid
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(400).json({ data: "ID is not a valid User ID." });
+
+    // Check if the user is already assigned in the card
+    if (!card.assignedTo.includes(user._id))
+      return res.status(400).json({ data: "User is not added in the card." });
+
+    // Remove the user from the card
+    card.assignedTo = card.assignedTo.filter(
+      (id) => id.toString() !== user._id.toString()
+    );
+    const removeCollaborator = await card.save();
+
+    // If removing collaborator fails
+    if (!removeCollaborator)
+      return res.status(500).json({ data: "Collaborator removal fails." });
+
+    // Send success response
+    res.status(200).json({
+      message: `User ${user.username} successfully removed from ${card.title}`,
+      data: {
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error("Error removing collaborator from card:", error);
+    res.status(500).json({ data: "Failed to remove collaborator from card." });
+  }
+};
+
 module.exports = {
   cardsPost,
   cardsGet,
@@ -283,5 +331,6 @@ module.exports = {
   deleteAllByListId,
   cardsDelete,
   getCardById,
-  cardsAddCollaborator
+  cardsAddCollaborator,
+  cardsRemoveCollaborator
 };

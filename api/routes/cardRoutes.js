@@ -8,6 +8,8 @@ router
   .post("/:listId", cardControllers.cardsPost) // Menggunakan cardsPost untuk membuat kartu baru
   .patch("/:id", cardControllers.cardsPatch) // Menggunakan cardsPatch untuk memperbarui kartu
   .delete("/:id", cardControllers.cardsDelete) // Menggunakan cardsDelete untuk menghapus kartu
-  .post("/addcollab/:cardId", cardControllers.cardsAddCollaborator);
+  .route("/collab/:cardId")
+  .post(cardControllers.cardsAddCollaborator)
+  .delete(cardControllers.cardsRemoveCollaborator);
 
 module.exports = router;
