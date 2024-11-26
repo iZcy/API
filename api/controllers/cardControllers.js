@@ -25,9 +25,7 @@ const deleteAllByListId = async (listId) => {
 const cardsPost = async (req, res) => {
   try {
     const { listId } = req.params;
-
-    const { title, description, assignedTo, status, createdAt, dueDate } =
-      req.body;
+    const { title, description, assignedTo, status, createdAt, dueDate } = req.body;
 
     // Check body existence
     if (!title) return res.status(400).json({ data: "Title is required." });
@@ -61,9 +59,15 @@ const cardsPost = async (req, res) => {
     });
 
     const savedCard = await newCard.save();
+
+    // Synchronize collaborators with the list
+    const uniqueCollaborators = new Set([...list.assignedTo, ...assignedTo]);
+    list.assignedTo = Array.from(uniqueCollaborators); // Ensure no duplicates
+    await list.save();
+
     res.status(201).json(savedCard);
   } catch (error) {
-    console.log(error);
+    console.error("Error creating card:", error);
     res.status(400).json({ data: "Error creating card" });
   }
 };
@@ -223,27 +227,33 @@ const cardsAddCollaborator = async (req, res) => {
     if (card.assignedTo.includes(user._id))
       return res.status(400).json({ data: "User is already added in the card." });
 
+    // Add the user to the card
     card.assignedTo.push(user._id);
-
     const addCollaborator = await card.save();
 
     // If adding collaborator fails
     if (!addCollaborator)
       return res.status(500).json({ data: "Collaborator addition fails." });
 
-    // res.status(200).json({ message: "User " + user.username + " successfully added to " + card.title });
+    // Synchronize collaborator to the list
+    const list = await List.findById(card.listId);
+    if (!list)
+      return res.status(400).json({ data: "List not found for the card." });
 
-    // res.status(200).json({
-    //   message: `User ${user.username} successfully added to ${card.title}`,
-    //   username: user.username, // Sertakan username
-    // });
+    // Add the user to the list if not already present
+    if (!list.assignedTo.includes(user._id)) {
+      list.assignedTo.push(user._id);
+      await list.save();
+    }
 
+    // Send success response
     res.status(200).json({
       message: `User ${user.username} successfully added to ${card.title}`,
       username: user.username, // Sertakan username
-    });    
+    });
   } catch (error) {
-
+    console.error("Error adding collaborator to card:", error);
+    res.status(500).json({ data: "Failed to add collaborator to card." });
   }
 };
 
