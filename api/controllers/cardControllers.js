@@ -101,7 +101,7 @@ const getCardById = async (req, res) => {
       return res.status(404).json({ message: "Card not found" });
     }
 
-    res.json(card);
+    res.json({ data: card });
   } catch (error) {
     console.error("Error getting card by ID:", error);
     res.status(500).json({ message: "Server Error" });
@@ -211,8 +211,8 @@ const cardsPatch = async (req, res) => {
         title,
         status,
         description,
-        assignedTo: updatedAssignedTo,  // Use updated assignedTo
-        dueDate, // Update dueDate if provided
+        assignedTo: updatedAssignedTo, // Use updated assignedTo
+        dueDate // Update dueDate if provided
       },
       { new: true }
     );
