@@ -1,8 +1,8 @@
 const Card = require("../models/cardModels");
 const List = require("../models/listsModels");
-const User = require('../models/userModels');
+const User = require("../models/userModels");
 const { deleteAllByCardId } = require("./commentsControllers");
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const deleteAllByListId = async (listId) => {
@@ -25,15 +25,20 @@ const deleteAllByListId = async (listId) => {
 const cardsPost = async (req, res) => {
   try {
     const { listId } = req.params;
-    const { title, description, assignedTo, status, createdAt, dueDate } = req.body;
+    const { title, description, assignedTo, status, createdAt, dueDate } =
+      req.body;
 
     // Check body existence
     if (!title) return res.status(400).json({ data: "Title is required." });
-    if (!description) return res.status(400).json({ data: "Description is required." });
+    if (!description)
+      return res.status(400).json({ data: "Description is required." });
     if (!listId) return res.status(400).json({ data: "List ID is required." });
-    if (!assignedTo) return res.status(400).json({ data: "Assigned To is required." });
-    if (!createdAt) return res.status(400).json({ data: "Created At is required." });
-    if (!dueDate) return res.status(400).json({ data: "Due Date is required." });
+    if (!assignedTo)
+      return res.status(400).json({ data: "Assigned To is required." });
+    if (!createdAt)
+      return res.status(400).json({ data: "Created At is required." });
+    if (!dueDate)
+      return res.status(400).json({ data: "Due Date is required." });
 
     // Check the data types
     const list = await List.findById(listId);
@@ -43,9 +48,11 @@ const cardsPost = async (req, res) => {
     if (!Array.isArray(assignedTo))
       return res.status(400).json({ error: "Assigned To must be an array" });
 
-    const validUsers = await User.find({ '_id': { $in: assignedTo } });
+    const validUsers = await User.find({ _id: { $in: assignedTo } });
     if (validUsers.length !== assignedTo.length) {
-      return res.status(400).json({ error: "Some assigned users are invalid." });
+      return res
+        .status(400)
+        .json({ error: "Some assigned users are invalid." });
     }
 
     const newCard = new Card({
@@ -89,7 +96,6 @@ const getCardById = async (req, res) => {
   }
 };
 
-
 // Get all cards
 const cardsGet = async (req, res) => {
   try {
@@ -100,7 +106,9 @@ const cardsGet = async (req, res) => {
       return res.status(400).json({ data: "ID is not a valid List ID." });
 
     // const cards = await Card.find().populate("assignedTo", "username name email"); // Populate users
-    const cards = await Card.find().populate("assignedTo", "username name email").exec(); // Populate users
+    const cards = await Card.find()
+      .populate("assignedTo", "username name email")
+      .exec(); // Populate users
 
     // Filter
     const filteredCards = cards.filter((card) => card.listId == listId);
@@ -123,9 +131,10 @@ const cardsPatch = async (req, res) => {
     console.log("Request body:", req.body);
 
     // Check body existence
-    if (!title && !status && !description  && !assignedTo && !dueDate)
+    if (!title && !status && !description && !assignedTo && !dueDate)
       return res.status(400).json({
-        error: "At least one field (title, status, description, assignedTo or dueDate) is required to update."
+        error:
+          "At least one field (title, status, description, assignedTo or dueDate) is required to update."
       });
 
     // Check if the card ID is valid
@@ -134,12 +143,11 @@ const cardsPatch = async (req, res) => {
         message: "Invalid card ID."
       });
 
-      if (dueDate && isNaN(Date.parse(dueDate))) {
-        return res.status(400).json({
-          error: "Invalid dueDate format. Expected a valid date string."
-        });
-      }
-      
+    if (dueDate && isNaN(Date.parse(dueDate))) {
+      return res.status(400).json({
+        error: "Invalid dueDate format. Expected a valid date string."
+      });
+    }
 
     // Validate assignedTo as array of ObjectId
     // if (assignedTo && !Array.isArray(assignedTo)) {
@@ -161,13 +169,14 @@ const cardsPatch = async (req, res) => {
       console.log("assignedTo is not an array");
       return res.status(400).json({ error: "Assigned To must be an array" });
     }
-    
-    const validUsers = await User.find({ '_id': { $in: assignedTo } });
+
+    const validUsers = await User.find({ _id: { $in: assignedTo } });
     if (validUsers.length !== assignedTo.length) {
       console.log("Some users are invalid:", assignedTo);
-      return res.status(400).json({ error: "Some assigned users are invalid." });
+      return res
+        .status(400)
+        .json({ error: "Some assigned users are invalid." });
     }
-    
 
     const card = await Card.findById(req.params.id);
     if (!card) {
@@ -239,7 +248,9 @@ const cardsAddCollaborator = async (req, res) => {
 
     // Check if the user is already assigned in the card
     if (card.assignedTo.includes(user._id))
-      return res.status(400).json({ data: "User is already added in the card." });
+      return res
+        .status(400)
+        .json({ data: "User is already added in the card." });
 
     // Add the user to the card
     card.assignedTo.push(user._id);
@@ -249,25 +260,14 @@ const cardsAddCollaborator = async (req, res) => {
     if (!addCollaborator)
       return res.status(500).json({ data: "Collaborator addition fails." });
 
-    // Synchronize collaborator to the list
-    // const list = await List.findById(card.listId);
-    // if (!list){
-    //   console.log("List not found with ID:", listId);
-    //   return res.status(400).json({ data: "List not found for the card." });
-    // }
-      
-    
-
-    // Add the user to the list if not already present
-    if (!list.assignedTo.includes(user._id)) {
-      list.assignedTo.push(user._id);
-      await list.save();
-    }
-
     // Send success response
     res.status(200).json({
       message: `User ${user.username} successfully added to ${card.title}`,
-      username: user.username, // Sertakan username
+      data: {
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      }
     });
   } catch (error) {
     console.error("Error adding collaborator to card:", error);
