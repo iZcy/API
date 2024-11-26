@@ -83,7 +83,7 @@ KanbanPemWebAPI/
 ### Core Development Team
 1. 👨‍💻 [Yitzhak Edmund Tio Manalu](https://github.com/iZcy)
 2. 👩‍💻 [Ovie Khaira Zayyan](https://github.com/Khairazzz)
-3. 👨‍💻 [Abe](https://github.com/abeputra)
+3. 👨‍💻 [⁠Emir Abe Putra Agastha](https://github.com/abeputra)
 4. 👨‍💻 [Sulaiman Fawwaz Abdillah Karim](https://github.com/sulaimanfawwazak)
 5. 👩‍💻 [Nibroos Aurore Majiid Haryanto](https://github.com/potreic)
 
