@@ -26,10 +26,49 @@ const deleteListsMiddleware = async (req, res, next) => {
 };
 
 
+// const boardGet = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const boards = await Board.find({ userId }).populate("userId", "username");
+
+//     const data = boards.map((board) => ({
+//       _id: board._id,
+//       title: board.title,
+//       createdBy: board.userId.username,
+//       description: board.description,
+//       visibility: board.visibility,
+//     }));
+
+//     res.status(200).json({ message: "Boards retrieved", data });
+//   } catch (error) {
+//     console.error("Error retrieving boards:", error);
+//     res.status(500).json({ message: "Error retrieving boards" });
+//   }
+// };
+
 const boardGet = async (req, res) => {
   try {
     const userId = req.user._id;
-    const boards = await Board.find({ userId }).populate("userId", "username");
+    const userRole = req.user.role; // Assuming role is stored in req.user
+
+    let boards;
+
+    if (userRole === "admin") {
+      boards = await Board.find().populate("userId", "username");
+    } else if (userRole === "guest") {
+      boards = await Board.find({ visibility: "public" }).populate("userId", "username");
+    } else if (userRole === "member") {
+      const memberCards = await Card.find({ assignedTo: userId });
+      const memberListIds = memberCards.map(card => card.listId);
+      const memberLists = await Lists.find({ _id: { $in: memberListIds } });
+      const memberBoardIds = memberLists.map(list => list.boardId);
+      boards = await Board.find({ 
+        $or: [
+          { _id: { $in: memberBoardIds } },
+          { visibility: "public" }
+        ]
+      }).populate("userId", "username");
+    }
 
     const data = boards.map((board) => ({
       _id: board._id,

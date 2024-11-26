@@ -22,30 +22,72 @@ const deleteAllByBoardId = async (boardId) => {
 const listsGet = async (req, res) => {
   try {
     const { boardId } = req.params;
+    const userId = req.user._id;
+    const userRole = req.user.role; // Assuming role is stored in req.user
 
-    // Check if boardId is not a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(boardId)) {
       return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
     }
 
-    // Check if boardId is valid
     const boardExists = await Boards.findById(boardId);
     if (!boardExists) {
       return res.status(400).json({ data: "Board ID not found" });
     }
 
-    // Find lists where boardId matches the provided boardId
-    let data = await Lists.find({ boardId }).populate("boardId");
+    let lists;
 
-    data = data.filter(
-      (list) => list.boardId && list.boardId._id.toString() === boardId
-    );
-    res.status(200).json({ data });
+    if (userRole === "admin") {
+      lists = await Lists.find({ boardId }).populate("boardId");
+    } else if (userRole === "guest") {
+      const publicCards = await Card.find({ status: "public" });
+      const publicListIds = publicCards.map(card => card.listId);
+      lists = await Lists.find({ _id: { $in: publicListIds }, boardId }).populate("boardId");
+    } else if (userRole === "member") {
+      const memberCards = await Card.find({ assignedTo: userId });
+      const memberListIds = memberCards.map(card => card.listId);
+      lists = await Lists.find({ 
+        $or: [
+          { _id: { $in: memberListIds } },
+          { boardId }
+        ]
+      }).populate("boardId");
+    }
+
+    lists = lists.filter(list => list.boardId && list.boardId._id.toString() === boardId);
+    res.status(200).json({ data: lists });
   } catch (error) {
-    console.error("Error getting Lists: ", error); // More detailed error log
+    console.error("Error getting Lists: ", error);
     res.status(500).json({ data: `Error getting Lists: ${error.message}` });
   }
 };
+
+// const listsGet = async (req, res) => {
+//   try {
+//     const { boardId } = req.params;
+
+//     // Check if boardId is not a valid ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(boardId)) {
+//       return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
+//     }
+
+//     // Check if boardId is valid
+//     const boardExists = await Boards.findById(boardId);
+//     if (!boardExists) {
+//       return res.status(400).json({ data: "Board ID not found" });
+//     }
+
+//     // Find lists where boardId matches the provided boardId
+//     let data = await Lists.find({ boardId }).populate("boardId");
+
+//     data = data.filter(
+//       (list) => list.boardId && list.boardId._id.toString() === boardId
+//     );
+//     res.status(200).json({ data });
+//   } catch (error) {
+//     console.error("Error getting Lists: ", error); // More detailed error log
+//     res.status(500).json({ data: `Error getting Lists: ${error.message}` });
+//   }
+// };
 
 const listsPost = async (req, res) => {
   try {
