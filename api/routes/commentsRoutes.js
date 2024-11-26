@@ -9,5 +9,6 @@ router
   .post("/:cardId", parseTokenDataMiddleware, commentsController.commentsPost)
   .patch("/:id", commentsController.commentsPatch)
   .delete("/:id", commentsController.commentsDelete);
+  // .delete("/", commentsController.commentsDelete);
 
 module.exports = router;
