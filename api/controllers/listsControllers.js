@@ -89,6 +89,7 @@ const listsPost = async (req, res) => {
 
 const listsPatch = async (req, res) => {
   try {
+    console.log("PATCH request received:", req.body); // Log request body
     const { id } = req.params;
     const { title, boardId, position } = req.body;
 
@@ -102,32 +103,20 @@ const listsPatch = async (req, res) => {
     if (title && typeof title !== "string")
       return res.status(400).json({ data: "Invalid title: Wrong Type" });
 
-    if (boardId) {
-      if (!mongoose.Types.ObjectId.isValid(boardId))
-        return res
-          .status(400)
-          .json({ data: "Invalid boardId: Must be a valid ObjectId" });
-
-      const boardExists = await Boards.findById(boardId);
-      if (!boardExists) {
-        return res.status(400).json({ data: "Board ID not found" });
-      }
-    }
-
-    if (position && typeof position !== "number")
-      return res.status(400).json({ data: "Invalid position: Wrong Type" });
-
+    // Update logic
     data.title = title || data.title;
     data.boardId = boardId || data.boardId;
     data.position = position || data.position;
 
     await data.save();
+    console.log("List updated successfully:", data); // Log hasil update
     res.status(200).json({ data: "List updated" });
   } catch (error) {
-    console.log(error);
+    console.error("Error updating list:", error.message); // Log error backend
     res.status(500).json({ data: "Error updating List" });
   }
 };
+
 
 const listsDelete = async (req, res) => {
   try {
