@@ -6,6 +6,7 @@ const listsController = require("../controllers/listsControllers");
 router.use(accessControl.parseTokenDataMiddleware);
 router
   .get("/:boardId", listsController.listsGet)
+  .get("/single/:listId", listsController.listsGetById)
   .post("/:boardId", listsController.listsPost)
   .patch("/:id", listsController.listsPatch)
   .delete("/:id", listsController.listsDelete);

@@ -36,6 +36,36 @@ const retrieveListsByUser = async (userIdToFind) => {
   }
 };
 
+const listsGetById = async (req, res) => {
+  try {
+    const { listId } = req.params;
+
+    // Check if boardId is not a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      return res
+        .status(400)
+        .json({ data: "Invalid listId: Must be a valid ObjectId" });
+    }
+
+    // Check if listId is valid
+    const listExists = await Lists.findById(listId);
+    if (!listExists) {
+      return res.status(400).json({ data: "List ID not found" });
+    }
+
+    // Find lists where boardId matches the provided boardId
+    const data = await Lists.findById(listId);
+
+    // Is the user the owner of the board?
+    if (!data) return res.status(400).json({ data: "List not exist" });
+
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error("Error getting List: ", error); // More detailed error log
+    res.status(500).json({ data: `Error getting List: ${error.message}` });
+  }
+};
+
 const listsGet = async (req, res) => {
   try {
     const { boardId } = req.params;
@@ -173,6 +203,7 @@ const listsDelete = async (req, res) => {
 
 module.exports = {
   listsGet,
+  listsGetById,
   listsPost,
   listsPatch,
   listsDelete,

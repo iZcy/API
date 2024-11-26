@@ -7,6 +7,7 @@ router.use(accessControl.parseTokenDataMiddleware);
 
 router
   .get("/", boardController.boardGet)
+  .get("/single/:boardId", boardController.boardGetById)
   .post("/", boardController.boardPost)
   .patch("/:id", boardController.boardPatch)
   .delete("/:id", boardController.boardDelete);

@@ -55,6 +55,36 @@ const boardGet = async (req, res) => {
   }
 };
 
+const boardGetById = async (req, res) => {
+  try {
+    const { boardId } = req.params;
+
+    // Check if boardId is not a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res
+        .status(400)
+        .json({ data: "Invalid listId: Must be a valid ObjectId" });
+    }
+
+    // Check if listId is valid
+    const boardExists = await Board.findById(boardId);
+    if (!boardExists) {
+      return res.status(400).json({ data: "Board ID not found" });
+    }
+
+    // Find lists where boardId matches the provided boardId
+    const data = await Board.findById(boardId);
+
+    // Is the user the owner of the board?
+    if (!data) return res.status(400).json({ data: "Board not exist" });
+
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error("Error getting List: ", error); // More detailed error log
+    res.status(500).json({ data: `Error getting List: ${error.message}` });
+  }
+};
+
 const boardPost = async (req, res) => {
   try {
     const { title, description, visibility } = req.body;
@@ -204,6 +234,7 @@ const boardDelete = async (req, res) => {
 module.exports = {
   boardPost,
   boardGet,
+  boardGetById,
   boardPatch,
   boardDelete
 };
