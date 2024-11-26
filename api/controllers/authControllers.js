@@ -515,6 +515,16 @@ const userUpdate = async (req, res) => {
   }
 };
 
+const getAllUserNameId = async (req, res) => {
+  try {
+    const users = await User.find({}, "_id username email");
+    res.status(200).json({ data: users });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ data: "Error getting users" });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
@@ -523,5 +533,6 @@ module.exports = {
   userRole,
   userChangePassword,
   userDelete,
-  userUpdate
+  userUpdate,
+  getAllUserNameId
 };
