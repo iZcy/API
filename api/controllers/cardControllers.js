@@ -61,9 +61,6 @@ const cardsPost = async (req, res) => {
     const savedCard = await newCard.save();
 
     // Synchronize collaborators with the list
-    // const uniqueCollaborators = new Set([...list.assignedTo, ...assignedTo]);
-    // list.assignedTo = Array.from(uniqueCollaborators); // Ensure no duplicates
-    // await list.save();
 
     res.status(201).json(savedCard);
   } catch (error) {
