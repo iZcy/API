@@ -3,15 +3,14 @@ const Lists = require("../models/listsModels");
 const Boards = require("../models/boardModels");
 const { deleteAllByListId } = require("./cardControllers");
 
-// Delete all lists by Board ID
 const deleteAllByBoardId = async (boardId) => {
   try {
-    // Find all lists with the boardId
-    const data = await Lists.find({ boardId });
-    // Delete all associated cards for each list
+    // Find all list with the boardId
+    const data = await List.find({ boardId });
+    // map all the listId and kill all card
     data.map((list) => deleteAllByListId(list._id));
-    // Delete all lists
-    await Lists.deleteMany({ boardId });
+    // kill all list
+    await List.deleteMany({ boardId });
 
     return true;
   } catch (error) {
@@ -20,87 +19,70 @@ const deleteAllByBoardId = async (boardId) => {
   }
 };
 
-// Get all lists for a board (include collaborator filtering)
 const listsGet = async (req, res) => {
   try {
     const { boardId } = req.params;
-    const { userId } = req.query; // Query parameter for collaborator filtering
 
-    // Check if boardId is valid
+    // Check if boardId is not a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(boardId)) {
       return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
     }
 
-    // Check if board exists
+    // Check if boardId is valid
     const boardExists = await Boards.findById(boardId);
     if (!boardExists) {
       return res.status(400).json({ data: "Board ID not found" });
     }
 
-    // Fetch lists for the board
-    let listsQuery = { boardId };
+    // Find lists where boardId matches the provided boardId
+    let data = await Lists.find({ boardId }).populate("boardId");
 
-    // If userId is provided, filter lists where user is a collaborator
-    if (userId) {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ data: "Invalid userId: Must be a valid ObjectId" });
-      }
-      listsQuery = {
-        boardId,
-        $or: [
-          { assignedTo: userId }, // User is a collaborator
-          { createdBy: userId }  // User is the creator
-        ]
-      };
-    }
-
-    // Find the lists with the query
-    const lists = await Lists.find(listsQuery)
-      .populate("assignedTo", "username name email") // Populate collaborator details
-      .populate("createdBy", "username name email"); // Populate creator details
-
-    res.status(200).json({ data: lists });
+    data = data.filter(
+      (list) => list.boardId && list.boardId._id.toString() === boardId
+    );
+    res.status(200).json({ data });
   } catch (error) {
-    console.error("Error getting Lists: ", error);
+    console.error("Error getting Lists: ", error); // More detailed error log
     res.status(500).json({ data: `Error getting Lists: ${error.message}` });
   }
 };
 
-// Create a new list
 const listsPost = async (req, res) => {
   try {
     const { boardId } = req.params;
-    const { title, position, assignedTo, createdBy } = req.body;
+    const { title, position } = req.body;
 
-    // Validate input
     if (!title) return res.status(400).json({ data: "Title is required" });
     if (!boardId) return res.status(400).json({ data: "Board ID is required" });
     if (!position && position !== 0)
       return res.status(400).json({ data: "Position is required" });
-    if (!createdBy) return res.status(400).json({ data: "CreatedBy is required" });
+
+    if (typeof title !== "string")
+      return res.status(400).json({ data: "Invalid title: Wrong Type" });
 
     if (!mongoose.Types.ObjectId.isValid(boardId))
-      return res.status(400).json({ data: "Invalid boardId: Must be a valid ObjectId" });
+      return res
+        .status(400)
+        .json({ data: "Invalid boardId: Must be a valid ObjectId" });
 
-    // Check if board exists
+    if (typeof position !== "number")
+      return res.status(400).json({ data: "Invalid position: Wrong Type" });
+
     const boardExists = await Boards.findById(boardId);
     if (!boardExists) {
       return res.status(400).json({ data: "Board ID not found" });
     }
 
-    // Create the new list
     const newList = new Lists({
       title,
       boardId,
-      position,
-      assignedTo: assignedTo || [], // Assigned collaborators (optional)
-      createdBy
+      position
     });
 
     await newList.save();
-    res.status(201).json({ data: "List created successfully" });
+    res.status(201).json({ data: "List created" });
   } catch (error) {
-    console.error("Error saving List: ", error);
+    console.log(error);
     res.status(500).json({ data: "Error saving List" });
   }
 };
@@ -109,12 +91,12 @@ const listsPatch = async (req, res) => {
   try {
     console.log("PATCH request received:", req.body); // Log request body
     const { id } = req.params;
-    const { title, boardId, position, assignedTo } = req.body;
+    const { title, boardId, position } = req.body;
 
     if (!id) return res.status(400).json({ data: "ID is required" });
 
-    const list = await Lists.findById(id);
-    if (!list) {
+    const data = await Lists.findById(id);
+    if (!data) {
       return res.status(404).json({ data: "List not found" });
     }
 
@@ -122,22 +104,19 @@ const listsPatch = async (req, res) => {
       return res.status(400).json({ data: "Invalid title: Wrong Type" });
 
     // Update logic
-    list.title = title || list.title;
-    list.boardId = boardId || list.boardId;
-    list.position = position || list.position;
+    data.title = title || data.title;
+    data.boardId = boardId || data.boardId;
+    data.position = position || data.position;
 
-    if (assignedTo && Array.isArray(assignedTo)) {
-      list.assignedTo = assignedTo;
-    }
-
-    await list.save();
-    console.log("List updated successfully:", list); // Log updated list
+    await data.save();
+    console.log("List updated successfully:", data); // Log hasil update
     res.status(200).json({ data: "List updated" });
   } catch (error) {
     console.error("Error updating list:", error.message); // Log error backend
     res.status(500).json({ data: "Error updating List" });
   }
 };
+
 
 const listsDelete = async (req, res) => {
   try {

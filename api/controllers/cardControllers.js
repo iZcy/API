@@ -75,25 +75,23 @@ const cardsPost = async (req, res) => {
 // Fungsi untuk mengambil card berdasarkan ID
 const getCardById = async (req, res) => {
   try {
-    const cardId = req.params.cardId; // Mendapatkan cardId dari parameter URL
+    const cardId = req.params.cardId;
 
-    // Query untuk mencari card berdasarkan cardId dan populate field assignedTo dengan username
     const card = await Card.findById(cardId)
-      .populate("assignedTo", "username")  // Populate username dari User yang terkait
-      .exec(); // Memastikan query dieksekusi
+      .populate("assignedTo", "username name email") // Populate user details
+      .exec();
 
-    // Mengecek apakah card ditemukan
     if (!card) {
       return res.status(404).json({ message: "Card not found" });
     }
 
-    // Mengembalikan hasil card yang sudah terpopulate
     res.json(card);
   } catch (error) {
-    console.error(error); // Menampilkan error ke console jika ada
+    console.error("Error getting card by ID:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 // Get all cards
 const cardsGet = async (req, res) => {
